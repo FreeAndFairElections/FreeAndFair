@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+
+set -eu
+
+#echo >&2 $PATH
+#set >&2
+
+# Is nix installed?  If so, use it.  Otherwise, default to the shitty
+# invocation, which might not be hermetic or reproducible well.
+which 2>&1 >/dev/null nix && { ./bazel-nix.sh "$@"; true; } || ./bazel-nonnix.sh "$@"
+
