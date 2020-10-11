@@ -29,8 +29,12 @@ in mkShell {
       jsInputs = [
         nodejs
       ];
+
+      reactNativeInputs = [
+        cocoapods
+      ];
     in
-      coreInputs ++ scalaInputs ++ jsInputs;
+      coreInputs ++ scalaInputs ++ jsInputs ++ reactNativeInputs;
 
   name = "${project_name}-build-nix-shell";
 
