@@ -1,0 +1,12 @@
+{
+  "name": "FreeAndFair",
+  "displayName": "Free And Fair Elections",
+  "expo": {
+    "name": "FreeAndFair",
+    "slug": "FreeAndFair",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
