@@ -84,6 +84,7 @@ class NavBar
                 onPress={() => {
                   this.setState({ confirmDeleteVisible: false })
                   p.dispatch({ type: Action.SaveUserData, payload: undefined })
+                  p.dispatch({ type: Action.GoHome })
                   p.dispatch({ type: Action.SnackbarMessage, message: "Cleared user data" })
                 }}
 
