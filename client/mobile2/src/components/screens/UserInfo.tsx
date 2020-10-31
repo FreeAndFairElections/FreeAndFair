@@ -36,8 +36,6 @@ const noops: CB = {
   onCancel: ignore,
 }
 
-const badValueColor = { backgroundColor: "#ffe0e0" }
-
 const WhoAreYou: FunctionComponent<P> = (props) => {
   // Default to no-op callbacks if they weren't specified.
   const p = { ...noops, ...props }
@@ -83,12 +81,6 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
       >
         {({ handleChange, handleBlur, handleSubmit, touched, errors, values }) => {
 
-          const badValue =
-            (f: keyof UserData,
-              k: keyof ViewStyle = "backgroundColor",
-              ignoreBlur: boolean = false) =>
-              ((ignoreBlur || touched[f]) && errors[f]) ? badValueColor : {}
-
           type CustomInput<P> = {
             component?: React.ComponentType<P>
             props?: P
@@ -132,10 +124,10 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
                   component: TextInputMask,
                   props: {
                     onChangeText: (text: string, rawText?: string) => handleChange('phoneNumber')(rawText || text),
-                    placeholder: "(   )    -    ",
+                    placeholder: "   -   -    ",
                     type: "custom",
                     options: {
-                      mask: "(999) 999-9999",
+                      mask: "999-999-9999",
                     },
                     keyboardType: "phone-pad"
                   }
