@@ -1,7 +1,7 @@
 import { Formik } from 'formik';
 import { PhoneNumberUtil } from "google-libphonenumber";
 import React, { FunctionComponent } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
 import { Input } from 'react-native-elements';
 import { TextInputMask, TextInputMaskProps } from 'react-native-masked-text';
 import { Button, Headline } from 'react-native-paper';
@@ -110,7 +110,7 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
             <KeyboardAvoidingView
               behavior={'height'}
               enabled
-            // keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 84}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 84}
             >
               <ScrollView keyboardShouldPersistTaps="handled" style={{ maxWidth: 500 }} >
                 <Headline style={{ margin: 5, marginVertical: 10 }}>
