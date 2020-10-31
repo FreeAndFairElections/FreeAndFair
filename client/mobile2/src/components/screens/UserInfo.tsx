@@ -24,8 +24,7 @@ type FormErrors = {
 }
 
 export const emptyFormData: UserData = Object.seal({
-  firstName: "",
-  lastName: "",
+  name: "",
   phoneNumber: "",
   formattedPhoneNumber: "",
 })
@@ -44,11 +43,10 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
   // rather than recreating it each render.
   const validate: (f: UserData) => void | object = (f: UserData) => {
     const errors: FormErrors = {}
-    if (!f.firstName)
-      errors.firstName = "Missing First Name"
-
-    if (!f.lastName)
-      errors.lastName = "Missing Last Name"
+    if (!f.name)
+      errors.name = "Missing Name"
+    else if (!f.name.search(/ /))
+      errors.name = "Bad Name Format"
 
     const isValidNumber = (number: string, countryCode: string) => {
       try {
@@ -61,11 +59,11 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
     if (!f.phoneNumber)
       errors.phoneNumber = "Missing Phone Number"
     else if (!isValidNumber(f.phoneNumber, "US"))
-      errors.phoneNumber = "Invalid phone number"
+      errors.phoneNumber = "Invalid Phone Number"
 
 
     if (f.email && !f.email.match(/[^@]+@[^.]+\.[^.]+/))
-      errors.email = "Invalid email address"
+      errors.email = "Invalid Email Address"
     return errors
   }
 
@@ -117,8 +115,11 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
                   Tell us about yourself
                 </Headline>
 
-                {textInput("firstName", "First Name")}
-                {textInput("lastName", "Last Name")}
+                {textInput("name", "Name", {
+                  props: {
+                    autoCompleteType: "name",
+                  }
+                })}
 
                 {textInput<TextInputMaskProps>("phoneNumber", "Phone Number", {
                   component: TextInputMask,
@@ -129,14 +130,15 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
                     options: {
                       mask: "999-999-9999",
                     },
-                    keyboardType: "phone-pad"
+                    keyboardType: "phone-pad",
+                    autoCompleteType: "tel",
                   }
                 })}
 
                 {textInput("email", "Email address (optional)", {
                   props: {
                     keyboardType: "email-address",
-                    // placeholder: "optional",
+                    autoCompleteType: "email",
                   }
                 })}
 

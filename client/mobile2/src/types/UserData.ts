@@ -1,7 +1,6 @@
 
 export type UserData = {
-  firstName: string;
-  lastName: string;
+  name: string;
   phoneNumber: string;
   formattedPhoneNumber: string;
   email?: string;
