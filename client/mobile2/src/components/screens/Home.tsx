@@ -41,6 +41,7 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
       >Report Something Awesome</Button>
+      {p.children}
     </View>
   )
 

@@ -1,5 +1,6 @@
-import { Persist } from "../types/AppState"
+import { Persisted } from "../types/AppState"
 import { UserData } from "../types/UserData"
+import {LocationObject} from 'expo-location';
 
 export enum Action {
   GoHome,
@@ -12,6 +13,7 @@ export enum Action {
   SnackbarMessage,
   LoadedPersistedData,
   StoreDispatch,
+  UpdateLocation,
 }
 
 export type Command = {
@@ -22,10 +24,13 @@ export type Command = {
   payload?: UserData
 } | {
   type: Action.LoadedPersistedData,
-  payload: Persist,
+  payload: Persisted,
 } | {
   type: Action.StoreDispatch,
   dispatch: Dispatch,
+} | {
+  type: Action.UpdateLocation,
+  location: LocationObject,
 } | {
   // No-payload actions
   type: Action.GoHome |

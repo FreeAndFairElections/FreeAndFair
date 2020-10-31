@@ -1,5 +1,5 @@
 
 export interface NavControl {
-  showNav(): void;
+  openNav(): void;
   closeNav(): void;
 }

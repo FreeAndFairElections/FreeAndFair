@@ -3,13 +3,9 @@ import { DrawerLayoutAndroid, ScrollView, StyleSheet, View } from 'react-native'
 import { Button, Dialog, Divider, Drawer, Paragraph, Portal } from 'react-native-paper';
 import { Action, Dispatch } from '../../actions/Actions';
 import AppState from "../../types/AppState";
-import Screen from "../screens/Screen";
+import AppScreen from "../../types/AppScreen";
 import { NavControl } from './ShowNav';
-
-type P = {
-  dispatch: Dispatch,
-  appState: AppState,
-}
+import P from './NavBarProps'
 
 type S = {
   drawer: RefObject<DrawerLayoutAndroid>
@@ -45,7 +41,7 @@ class NavBar
         <Drawer.Section title="Actions" >
           <Drawer.Item
             label="Home"
-            active={p.appState.screen === Screen.Home}
+            active={p.screen === AppScreen.Home}
             onPress={() => {
               drawer.current?.closeDrawer()
               p.dispatch({ type: Action.GoHome })
@@ -58,7 +54,7 @@ class NavBar
             active={false}
             onPress={() => {
               drawer.current?.closeDrawer()
-              if (p.appState.persist.userData)
+              if (p.userDataSet)
                 this.setState({ confirmDeleteVisible: true })
             }}
           />
@@ -101,7 +97,7 @@ class NavBar
     )
   }
 
-  showNav() {
+  openNav() {
     this.state.drawer.current?.openDrawer()
   }
   closeNav() {

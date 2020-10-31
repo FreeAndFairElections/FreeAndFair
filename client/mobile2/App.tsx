@@ -1,25 +1,29 @@
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { AppLoading } from 'expo';
+import * as Location from 'expo-location';
 import React, { FunctionComponent, useReducer, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Appbar, Provider as PaperProvider, Snackbar } from 'react-native-paper';
 import { Action, Command } from './src/actions/Actions';
+import NavBar from './src/components/navbar/NavBar';
 import HomeScreen from './src/components/screens/Home';
 import UserInfoScreen from './src/components/screens/UserInfo';
 import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
-import NavBar from './src/components/navbar/NavBar';
-import Screen from './src/components/screens/Screen';
+import AppScreen from './src/types/AppScreen';
 import AppState from './src/types/AppState';
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
-const screenReducer = (state: AppState, command: Command) => {
+const screenReducer: (s: AppState, c: Command) => AppState = (state, command) => {
   switch (command.type) {
     case Action.StoreDispatch:
       return { ...state, dispatch: command.dispatch }
     case Action.SnackbarMessage:
       return { ...state, homeBanner: command.message }
     case Action.SaveUserData:
-      // console.log(`Saving user info: ${JSON.stringify(command.payload)}`)
-      state.persistStore.setItem(JSON.stringify(state.persist), (error?: Error) => {
+      const newPersisted = { ...state.persisted, userData: command.payload }
+      const toSave = JSON.stringify(newPersisted)
+      state.log(`Saving user info: ${toSave}`)
+
+      state.persistStore.setItem(toSave, (error?: Error) => {
         error && state.dispatch?.({
           type: Action.SnackbarMessage,
           message: `Save failed: ${error.message}`,
@@ -27,23 +31,20 @@ const screenReducer = (state: AppState, command: Command) => {
       })
       return {
         ...state,
-        persist: {
-          ...state.persist,
-          userData: command.payload,
-        }
+        persisted: newPersisted
       }
     case Action.LoadedPersistedData:
-      // console.log(`Loaded data: ${JSON.stringify(command.payload)}`)
+      state.log(`Loaded data: ${JSON.stringify(command.payload)}`)
       return {
         ...state,
-        persist: command.payload,
+        persisted: command.payload,
       }
     case Action.GoHome:
-      return { ...state, screen: Screen.Home }
+      return { ...state, screen: AppScreen.Home }
     case Action.EditUserData:
-      return { ...state, screen: Screen.UserInfo }
+      return { ...state, screen: AppScreen.UserInfo }
     case Action.StartProblemReport:
-      return { ...state, screen: Screen.Home }
+      return { ...state, screen: AppScreen.Home }
     case Action.StartAwesomeReport:
       // TODO(Dave): Complete me
       alert("IMPLEMENT ME")
@@ -51,29 +52,66 @@ const screenReducer = (state: AppState, command: Command) => {
     case Action.DismissSnackbar:
       return { ...state, homeBanner: undefined }
     case Action.OpenNavBar:
-      state.navBar.current?.showNav()
+      state.navBar.current?.openNav()
       return { ...state }
+    case Action.UpdateLocation:
+      return { ...state, location: command.location }
   }
 }
 
-const App: FunctionComponent<{}> = (props) => {
-  const [isReady, setIsReady] = useState(false)
-  const navBar = useRef<NavBar>(null)
+type Props = {
+  exp?: {
+    manifest?: {
+      packagerOpts?: {
+        dev?: boolean
+      }
+    }
+  }
+}
 
-  const [state, dispatch] = useReducer(screenReducer, {
-    screen: Screen.Home,
+const App: FunctionComponent<Props> = (props) => {
+  const navBar = useRef<NavBar>(null)
+  const initialState: AppState = {
+    screen: AppScreen.Home,
     navBar: navBar,
-    persistStore: useAsyncStorage("persist"),
-    persist: {}
-  })
+    navBarOpen: false,
+    log: (m, ...p) =>
+      (props.exp?.manifest?.packagerOpts?.dev ? console.log(m, p) : undefined),
+    persistStore: useAsyncStorage("persisted"),
+    persisted: {}
+  }
+  const [state, dispatch] = useReducer(screenReducer, initialState)
+  const [isReady, setIsReady] = useState(false)
 
   const loadInitialAsync = async () => {
     const loadPersisted = state.persistStore.getItem((error?: Error, result?: string) => {
-      if (error)
+      if (error) {
         dispatch({ type: Action.SnackbarMessage, message: `Load failed: ${error.message}` })
-      if (result !== undefined) {
-        // dispatch({ type: Action.SnackbarMessage, message: "Loaded app data" })
-        dispatch({ type: Action.LoadedPersistedData, payload: JSON.parse(result) })
+        state.log(`Load failed: ${JSON.stringify(error)}`)
+      }
+      if (result) {
+        dispatch({ type: Action.SnackbarMessage, message: "Loaded app data" })
+        dispatch({ type: Action.LoadedPersistedData, payload: JSON.parse(result) || {} })
+        state.log(`Loaded: ${result}`)
+      }
+    })
+
+    const startLocation = (async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if (status !== 'granted') {
+        dispatch({
+          type: Action.SnackbarMessage,
+          message: "Required Location Permission Denied"
+        })
+        await startLocation()
+      } else {
+        let location = await Location.getCurrentPositionAsync({});
+        dispatch({ type: Action.UpdateLocation, location: location })
+        dispatch({
+          type: Action.SnackbarMessage,
+          message: `Got location: ${location.coords.latitude} ${location.coords.longitude}`
+        })
+        // mapRef.current?.animateCamera({center: location.coords, zoom: 16})
       }
     })
 
@@ -99,7 +137,7 @@ const App: FunctionComponent<{}> = (props) => {
       // { UbuntuLightItalic: require('./assets/fonts/Ubuntu-Light-Italic.ttf') },
     ]);
 
-    await Promise.all([loadPersisted, ...imageAssets, ...fontAssets]);
+    await Promise.all([loadPersisted, startLocation(), ...imageAssets, ...fontAssets]);
   };
 
   if (!isReady) {
@@ -119,27 +157,34 @@ const App: FunctionComponent<{}> = (props) => {
         <Appbar.Content title="Free And Fair Elections" />
         <Appbar.Action icon="home" onPress={() => dispatch({ type: Action.GoHome })} />
       </Appbar.Header>
-      <NavBar ref={navBar} appState={state} dispatch={dispatch}>
+      <NavBar
+        ref={navBar}
+        dispatch={dispatch}
+        screen={state.screen}
+        userDataSet={
+          state.persisted.userData ? true : false
+        }
+      >
         {(() => {
           switch (state.screen) {
-            case Screen.Home:
+            case AppScreen.Home:
               return (
                 <HomeScreen
                   dispatch={dispatch}
-                  requireUserSetup={!state.persist?.userData}
+                  requireUserSetup={!state.persisted.userData}
                   homeBanner={state.homeBanner}
                 />
               )
-            case Screen.UserInfo:
+            case AppScreen.UserInfo:
               return (
                 <UserInfoScreen
-                  initialValues={state.persist?.userData || {}}
+                  initialValues={state.persisted.userData || {}}
                   onCancel={() => {
                     dispatch({ type: Action.GoHome, })
                     dispatch({ type: Action.SnackbarMessage, message: "Canceled update..." })
                   }}
                   onSubmit={(data) => {
-                    if (state.persist?.userData !== data)
+                    if (state.persisted.userData !== data)
                       dispatch({ type: Action.SnackbarMessage, message: "Saved user info" })
                     dispatch({ type: Action.SaveUserData, payload: data })
                     dispatch({ type: Action.GoHome })
