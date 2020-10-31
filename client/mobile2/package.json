@@ -11,9 +11,11 @@
     "@expo/vector-icons": "^10.2.1",
     "@react-native-async-storage/async-storage": "^1.13.1",
     "@react-native-community/async-storage": "~1.12.0",
+    "@react-native-community/datetimepicker": "3.0.0",
     "@types/google-libphonenumber": "^7.4.19",
     "@types/react-native-snackbar-component": "^1.1.0",
     "@types/react-native-text-input-mask": "^0.7.5",
+    "@types/react-native-uuid": "^1.4.0",
     "axios": "^0.20.0",
     "expo": "~39.0.2",
     "expo-asset": "~8.2.0",
@@ -36,6 +38,7 @@
     "react-native-gesture-handler": "~1.7.0",
     "react-native-maps": "0.27.1",
     "react-native-masked-text": "^1.13.0",
+    "react-native-modal-datetime-picker": "^9.0.0",
     "react-native-paper": "^4.2.0",
     "react-native-phone-number-input": "^1.1.0",
     "react-native-reanimated": "~1.13.0",
@@ -43,7 +46,10 @@
     "react-native-snackbar-component": "^1.1.11",
     "react-native-text-input-mask": "^2.0.0",
     "react-native-unimodules": "~0.11.0",
-    "react-native-web": "~0.13.12"
+    "react-native-uuid": "^1.4.9",
+    "react-native-uuid-generator": "^6.1.1",
+    "react-native-web": "~0.13.12",
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

@@ -1,7 +1,8 @@
 
 enum AppScreen {
   Home,
-  UserInfo
+  UserInfo,
+  JoyReport,
 }
 
 export default AppScreen

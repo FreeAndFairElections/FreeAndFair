@@ -36,7 +36,7 @@ const HomeScreen: FunctionComponent<P> = (p) => {
 
       <Button
         mode="contained"
-        onPress={() => { }}
+        onPress={() => p.dispatch({ type: Action.StartAwesomeReport })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}

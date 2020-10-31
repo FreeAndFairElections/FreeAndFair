@@ -2,11 +2,12 @@ import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { AppLoading } from 'expo';
 import * as Location from 'expo-location';
 import React, { FunctionComponent, useReducer, useRef, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Appbar, Provider as PaperProvider, Snackbar } from 'react-native-paper';
 import { Action, Command } from './src/actions/Actions';
 import NavBar from './src/components/navbar/NavBar';
 import HomeScreen from './src/components/screens/Home';
+import JoyReport from './src/components/screens/JoyReport';
 import UserInfoScreen from './src/components/screens/UserInfo';
 import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
 import AppScreen from './src/types/AppScreen';
@@ -46,9 +47,7 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
     case Action.StartProblemReport:
       return { ...state, screen: AppScreen.Home }
     case Action.StartAwesomeReport:
-      // TODO(Dave): Complete me
-      alert("IMPLEMENT ME")
-      return { ...state }
+      return { ...state, screen: AppScreen.JoyReport }
     case Action.DismissSnackbar:
       return { ...state, homeBanner: undefined }
     case Action.OpenNavBar:
@@ -191,6 +190,25 @@ const App: FunctionComponent<Props> = (props) => {
                   }}
                 />
               )
+            case AppScreen.JoyReport:
+              if (state.location) {
+                return (
+                  <JoyReport
+                    initialValues={{}}
+                    dispatch={dispatch}
+                    location={state.location}
+                    onCancel={() => dispatch({type: Action.GoHome})}
+                    onSubmit={(f) => {
+                      state.log(`Created report ${JSON.stringify(f)}`)
+                      dispatch({type: Action.GoHome})
+                      dispatch({type: Action.SnackbarMessage, message: "Submitting awesomeness report"})
+                    }}
+                    />
+                )
+              } else {
+                dispatch({type: Action.GoHome})
+                return <View />
+              }
           }
         })()}
       </NavBar>
