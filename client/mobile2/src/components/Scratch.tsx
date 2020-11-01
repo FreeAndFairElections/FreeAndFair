@@ -2,7 +2,6 @@ import * as Location from 'expo-location';
 import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import MapView from 'react-native-maps';
-import PhoneInput from 'react-native-phone-number-input';
 
 const Scratch: FunctionComponent<{}> = (props) => {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
