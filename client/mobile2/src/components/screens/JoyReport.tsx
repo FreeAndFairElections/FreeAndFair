@@ -10,7 +10,9 @@ import { Command } from '../../actions/Actions';
 import DateTime from '../DateTime'; 
 import uuid from 'react-native-uuid'
 
-type Form = {
+export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
+
+export type Form = {
   issue_type: "joy",
   issue_subtype: "dancing" | "kindness" | "patience" | "other",
   description: string,
@@ -38,8 +40,9 @@ export const emptyFormData: Form = Object.seal({
   description: "",
   incident_state: "",
   incident_city: "",
-  incident_time: `${(new Date()).getTime() * 1000}`,  // microseconds since epoch  
-  globalid: uuid.v4()
+  incident_time: `${(new Date()).getTime()}`,  // milliseconds since epoch  
+  globalid: `{${uuid.v4()}}`,
+  // globalid: knownDuplicateUUID
 })
 
 const ignore = () => { }
@@ -154,14 +157,14 @@ const JoyReport: FunctionComponent<P> = (props) => {
                     props: {
                       disabled: true,
                     }
-                  }, (d) => `${new Date(parseInt(d) / 1000).toLocaleString()}`)}
+                  }, (d) => `${new Date(parseInt(d)).toLocaleString()}`)}
                   <DateTime
                     enabled={dateVisible}
                     dispatch={p.dispatch}
                     onCancel={() => setDateVisible(false)}
                     onSubmit={(d) => {
-                      console.log(`picked: ${d} ${d.getTime() * 1000}`)
-                      handleChange("incident_time")(`${d.getTime() * 1000}`)
+                      console.log(`picked: ${d} ${d.getTime()}`)
+                      handleChange("incident_time")(`${d.getTime()}`)
                       setDateVisible(false)
                     }}
                   />

@@ -10,6 +10,7 @@ import HomeScreen from './src/components/screens/Home';
 import JoyReport from './src/components/screens/JoyReport';
 import UserInfoScreen from './src/components/screens/UserInfo';
 import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
+import { submitJoy } from './src/helpers/SeeSaySubmit';
 import AppScreen from './src/types/AppScreen';
 import AppState from './src/types/AppState';
 
@@ -98,21 +99,26 @@ const App: FunctionComponent<Props> = (props) => {
     const startLocation = (async () => {
       let { status } = await Location.requestPermissionsAsync();
       if (status !== 'granted') {
+        // TODO(Dave): Make this a modal failure
         dispatch({
           type: Action.SnackbarMessage,
           message: "Required Location Permission Denied"
         })
-        await startLocation()
       } else {
         let location = await Location.getCurrentPositionAsync({});
         dispatch({ type: Action.UpdateLocation, location: location })
-        dispatch({
-          type: Action.SnackbarMessage,
-          message: `Got location: ${location.coords.latitude} ${location.coords.longitude}`
-        })
+        // dispatch({
+        //   type: Action.SnackbarMessage,
+        //   message: `Got location: ${location.coords.latitude} ${location.coords.longitude}`
+        // })
+
         // mapRef.current?.animateCamera({center: location.coords, zoom: 16})
       }
     })
+
+    // Update the location every few seconds
+    setTimeout(startLocation, 1000)
+    setInterval(startLocation, 10000)
 
     const imageAssets = cacheImages([
       // require('./assets/images/bg_screen1.jpg'),
@@ -136,7 +142,7 @@ const App: FunctionComponent<Props> = (props) => {
       // { UbuntuLightItalic: require('./assets/fonts/Ubuntu-Light-Italic.ttf') },
     ]);
 
-    await Promise.all([loadPersisted, startLocation(), ...imageAssets, ...fontAssets]);
+    await Promise.all([loadPersisted, ...imageAssets, ...fontAssets]);
   };
 
   if (!isReady) {
@@ -197,16 +203,22 @@ const App: FunctionComponent<Props> = (props) => {
                     initialValues={{}}
                     dispatch={dispatch}
                     location={state.location}
-                    onCancel={() => dispatch({type: Action.GoHome})}
+                    onCancel={() => dispatch({ type: Action.GoHome })}
                     onSubmit={(f) => {
                       state.log(`Created report ${JSON.stringify(f)}`)
-                      dispatch({type: Action.GoHome})
-                      dispatch({type: Action.SnackbarMessage, message: "Submitting awesomeness report"})
+                      submitJoy(
+                        state.persisted.userData!, 
+                        f, 
+                        state.location!, 
+                        dispatch, 
+                        state.log)
+                      dispatch({ type: Action.GoHome })
+                      dispatch({ type: Action.SnackbarMessage, message: "Submitting awesomeness report" })
                     }}
-                    />
+                  />
                 )
               } else {
-                dispatch({type: Action.GoHome})
+                dispatch({ type: Action.GoHome })
                 return <View />
               }
           }
