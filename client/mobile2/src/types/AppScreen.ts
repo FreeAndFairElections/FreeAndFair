@@ -2,6 +2,8 @@
 enum AppScreen {
   Home,
   UserInfo,
+  IntimidationReport,
+  ProblemReport,
   JoyReport,
 }
 

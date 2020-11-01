@@ -20,11 +20,20 @@ const HomeScreen: FunctionComponent<P> = (p) => {
       <Text style={styles.text}>What would you like to do?</Text>
 
       <Button
-        mode="contained"
+        mode={p.requireUserSetup ? "contained" : "outlined"}
         onPress={() => p.dispatch({ type: Action.EditUserData })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
       >Edit User Info</Button>
+
+      <Button
+        mode="contained"
+        color="#ff2020"
+        onPress={() => p.dispatch({ type: Action.StartIntimidationReport })}
+        contentStyle={styles.buttonInner}
+        style={styles.buttonOuter}
+        {...(p.requireUserSetup && { disabled: true })}
+      >Report Voter Intimidation</Button>
 
       <Button
         mode="contained"

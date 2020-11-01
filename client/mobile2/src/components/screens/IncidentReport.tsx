@@ -8,35 +8,28 @@ import { Button, Headline, RadioButton } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import uuid from 'react-native-uuid';
 import { Command } from '../../actions/Actions';
-import SeeSay2020Submission, { BaseForm, JoyType } from '../../types/SeeSay2020Submission';
+import SeeSay2020Submission, { BaseForm, FormSelectors, IssueTypeDetails, ProblemType } from '../../types/SeeSay2020Submission';
 import DateTime from '../DateTime';
 
 type Form = SeeSay2020Submission
-// export type Form = {
-//   issue_type: "joy",
-//   issue_subtype: "dancing" | "kindness" | "patience" | "other",
-//   description: string,
-//   incident_state: string,
-//   incident_city: string,
-//   // TODO(Dave): Fix this shit.
-//   incident_time: string,  // microseconds since epoch
-//   globalid: string,
-// }
+
 type CB = {
   onSubmit: (form: Form) => void,
   onCancel: () => void,
 }
 type P = {
   dispatch: (command: Command) => void,
-  initialValues: Partial<BaseForm & JoyType>,
+  initialValues: Partial<BaseForm & ProblemType>,
   location: LocationObject,
+  formStructure: Partial<FormSelectors>,
+  display?: <ST>(issueType: IssueTypeDetails<ST>) => boolean,
 } & Partial<CB>
 type FormErrors = {
   [K in keyof Form]?: String
 }
 export const emptyFormData: Form = Object.seal({
-  issue_type: "joy",
-  issue_subtype: "patience",
+  issue_type: "intimidation",
+  issue_subtype: "polling_place_interference",
   description: "",
   incident_state: "",
   incident_city: "",
@@ -50,7 +43,7 @@ const noops: CB = {
   onCancel: ignore,
 }
 
-const JoyReport: FunctionComponent<P> = (props) => {
+const IncidentReport: FunctionComponent<P> = (props) => {
   const p = { ...noops, ...props }
   const [dateVisible, setDateVisible] = useState(false)
 
@@ -78,7 +71,7 @@ const JoyReport: FunctionComponent<P> = (props) => {
       >
         {({ handleChange, handleBlur, handleSubmit, touched, errors, values }) => {
           const radio = (label: string, value: string, extraViewStyle?: ViewStyle) => (
-            <View style={{
+            <View key={`${label} ${value}`} style={{
               ...extraViewStyle,
             }}>
               <RadioButton.Item label={label} value={value} />
@@ -98,6 +91,7 @@ const JoyReport: FunctionComponent<P> = (props) => {
                 onChangeText={handleChange(p)}
                 onBlur={handleBlur(p)}
                 value={customRender(values[p] || "")}
+                key={label}
                 label={label}
                 renderErrorMessage={true}
                 inputStyle={{
@@ -117,22 +111,72 @@ const JoyReport: FunctionComponent<P> = (props) => {
               keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 84}
             >
               <ScrollView keyboardShouldPersistTaps="handled" style={{ maxWidth: 500 }} >
-                <Headline style={{
-                  margin: 5,
-                  marginVertical: 10
-                }}>
-                  What did you see?
+
+                {/* Primary issue type */}
+                {Object
+                  .keys(p.formStructure)
+                  .filter(k => p.display?.(p.formStructure[k]) ?? true)
+                  .length > 1 && <View>
+                    <Headline key="maintitle" style={{
+                      margin: 5,
+                      marginVertical: 10,
+                    }}>
+                      What happened?
                 </Headline>
+                    <RadioButton.Group
+                      onValueChange={value => {
+                        const updateSubtype = value !== values.issue_type
+                        handleChange("issue_type")(value)
+                        if (updateSubtype) {
+                          handleChange("issue_subtype")(p.formStructure[value].subtypes[0].subtype)
+                          // TODO(Dave): Select the first option.
+                        }
+                      }}
+                      value={values.issue_type || ""}
+                    >
+                      {Object
+                        .keys(p.formStructure)
+                        .filter(k => p.display?.(p.formStructure[k]) ?? true)
+                        .flatMap((k, i, a) =>
+                          (p.display?.(p.formStructure[k]) ?? true) ?
+                            [radio(p.formStructure[k].label, k, {
+                              // Alternate background shades
+                              ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
+                              // ...(i === 0 ? { borderTopWidth: 1 } : {}),
+                              ...(i === a.length - 1 ? { borderBottomWidth: 1 } : {}),
+                            })] :
+                            []
+                        )}
+                    </RadioButton.Group></View>
+                }
+
+                {/* TODO(Dave): This doesn't seem to actually do anything.  Why? */}
+                {/* <Divider key="midborder" style={{ borderBottomWidth: 1 }} /> */}
+                <Headline key="subtitle" style={{
+                  margin: 5,
+                  marginVertical: 10,
+                }}>
+                  ...more specifically:
+                </Headline>
+
+                {/* Secondary issue type */}
                 <RadioButton.Group
                   onValueChange={value => handleChange("issue_subtype")(value)}
                   value={values.issue_subtype || ""}
                 >
-                  {radio("Something Humorous", "patience", { backgroundColor: "#f8f8f8", borderTopWidth: 1 })}
-                  {radio("Act of Kindness", "kindness")}
-                  {radio("Dancing", "dancing", { backgroundColor: "#f8f8f8" })}
-                  {radio("Something Else", "other", { borderBottomWidth: 1 })}
+                  {p.formStructure[values.issue_type]
+                    .subtypes
+                    .map((k, i, a) =>
+                      radio(k.label, k.subtype, {
+                        //  Alternate background shades
+                        ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
+                        // ...(i === 0 ? { borderTopWidth: 1 } : {}),
+                        ...(i === a.length - 1 ? { borderBottomWidth: 1 } : {}),
+                      })
+                    )}
                 </RadioButton.Group>
 
+                {/* City & State */}
                 {textInput("incident_city", "City")}
 
                 {/* TODO(Dave): Replace the STATE picker */}
@@ -149,7 +193,9 @@ const JoyReport: FunctionComponent<P> = (props) => {
                   }
                 })}
 
+                {/* Date & Time */}
                 <TouchableOpacity
+                  key="datetime"
                   onPress={() => setDateVisible(true)}
                 >
                   {textInput("incident_time", "When", {
@@ -169,12 +215,14 @@ const JoyReport: FunctionComponent<P> = (props) => {
                   />
                 </TouchableOpacity>
 
+                {/* Freeform details */}
                 {textInput("description", "Details", {
                   props: {
                     multiline: true
                   }
                 })}
 
+                {/* Submissions buttons */}
                 <View style={styles.footerButtonGroup}>
                   <Button
                     mode="outlined"
@@ -198,7 +246,7 @@ const JoyReport: FunctionComponent<P> = (props) => {
   )
 }
 
-export default JoyReport
+export default IncidentReport
 
 const styles = StyleSheet.create({
   footerButtonGroup: {

@@ -2,17 +2,18 @@ import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { AppLoading } from 'expo';
 import * as Location from 'expo-location';
 import React, { FunctionComponent, useReducer, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Appbar, Provider as PaperProvider, Snackbar } from 'react-native-paper';
 import { Action, Command } from './src/actions/Actions';
 import NavBar from './src/components/navbar/NavBar';
 import HomeScreen from './src/components/screens/Home';
-import JoyReport from './src/components/screens/JoyReport';
+import IncidentReport from './src/components/screens/IncidentReport';
 import UserInfoScreen from './src/components/screens/UserInfo';
 import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
 import { submitToSeeSay2020 } from './src/helpers/SeeSaySubmit';
 import AppScreen from './src/types/AppScreen';
 import AppState from './src/types/AppState';
+import { formSelectors } from './src/types/SeeSay2020Submission';
 
 export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
 
@@ -48,7 +49,9 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
     case Action.EditUserData:
       return { ...state, screen: AppScreen.UserInfo }
     case Action.StartProblemReport:
-      return { ...state, screen: AppScreen.Home }
+      return { ...state, screen: AppScreen.ProblemReport }
+    case Action.StartIntimidationReport:
+      return { ...state, screen: AppScreen.IntimidationReport }
     case Action.StartAwesomeReport:
       return { ...state, screen: AppScreen.JoyReport }
     case Action.DismissSnackbar:
@@ -124,7 +127,8 @@ const App: FunctionComponent<Props> = (props) => {
     setInterval(startLocation, 30000)
 
     const imageAssets = cacheImages([
-      // require('./assets/FreeAndFair2020-splash.png')
+      require('./assets/FreeAndFair2020-splash2.png'),
+      require('./assets/FreeAndFair2020-icon4.png'),
       // require('./assets/images/bg_screen1.jpg'),
       // require('./assets/images/bg_screen2.jpg'),
       // require('./assets/images/bg_screen3.jpg'),
@@ -190,7 +194,7 @@ const App: FunctionComponent<Props> = (props) => {
                   initialValues={state.persisted.userData || {}}
                   onCancel={() => {
                     dispatch({ type: Action.GoHome, })
-                    dispatch({ type: Action.SnackbarMessage, message: "Canceled update..." })
+                    // dispatch({ type: Action.SnackbarMessage, message: "Canceled update..." })
                   }}
                   onSubmit={(data) => {
                     if (state.persisted.userData !== data)
@@ -200,32 +204,115 @@ const App: FunctionComponent<Props> = (props) => {
                   }}
                 />
               )
-            case AppScreen.JoyReport:
+            case AppScreen.IntimidationReport:
               if (state.location) {
                 return (
-                  <JoyReport
+                  <IncidentReport
                     initialValues={{
-                      ...(state.devBuild && {globalid: knownDuplicateUUID})
+                      issue_type: "intimidation",
+                      issue_subtype: "polling_place_interference",
+                      ...(state.devBuild && { globalid: knownDuplicateUUID }),
                     }}
                     dispatch={dispatch}
                     location={state.location}
+                    formStructure={{ intimidation: formSelectors.intimidation }}
+                    // display={x => x.goodThing ?? false}
                     onCancel={() => dispatch({ type: Action.GoHome })}
                     onSubmit={(f) => {
-                      state.log(`Created report ${JSON.stringify(f)}`)
+                      state.log(`Created joy report ${JSON.stringify(f, null, 2)}`)
                       submitToSeeSay2020(
-                        state.persisted.userData!, 
-                        f, 
-                        state.location!, 
-                        dispatch, 
+                        state.persisted.userData!,
+                        f,
+                        state.location!,
+                        dispatch,
                         state.log)
                       dispatch({ type: Action.GoHome })
-                      dispatch({ type: Action.SnackbarMessage, message: "Submitting awesomeness report" })
+                      dispatch({ type: Action.SnackbarMessage, message: "Submitting joy report" })
                     }}
                   />
                 )
               } else {
                 dispatch({ type: Action.GoHome })
-                return <View />
+                return <View><Text>Location permissions are required</Text></View>
+              }
+            case AppScreen.ProblemReport:
+              if (state.location) {
+                return (
+                  <IncidentReport
+                    initialValues={{
+                      ...(state.devBuild && { globalid: knownDuplicateUUID })
+                    }}
+                    dispatch={dispatch}
+                    location={state.location}
+                    formStructure={formSelectors}
+                    display={x => !x.goodThing ?? false}
+                    onCancel={() => dispatch({ type: Action.GoHome })}
+                    onSubmit={(f) => {
+                      state.log(`Created problem report ${JSON.stringify(f, null, 2)}`)
+                      submitToSeeSay2020(
+                        state.persisted.userData!,
+                        f,
+                        state.location!,
+                        dispatch,
+                        state.log)
+                      dispatch({ type: Action.GoHome })
+                      dispatch({ type: Action.SnackbarMessage, message: "Submitting problem report" })
+                    }}
+                  />
+                )
+              } else {
+                dispatch({ type: Action.GoHome })
+                return <View><Text>Location permissions are required</Text></View>
+              }
+            case AppScreen.JoyReport:
+              if (state.location) {
+                return (
+                  <IncidentReport
+                    initialValues={{
+                      issue_type: "joy",
+                      issue_subtype: "patience",
+                      ...(state.devBuild && { globalid: knownDuplicateUUID }),
+                    }}
+                    dispatch={dispatch}
+                    location={state.location}
+                    formStructure={{ joy: formSelectors.joy }}
+                    display={x => x.goodThing ?? false}
+                    onCancel={() => dispatch({ type: Action.GoHome })}
+                    onSubmit={(f) => {
+                      state.log(`Created joy report ${JSON.stringify(f, null, 2)}`)
+                      submitToSeeSay2020(
+                        state.persisted.userData!,
+                        f,
+                        state.location!,
+                        dispatch,
+                        state.log)
+                      dispatch({ type: Action.GoHome })
+                      dispatch({ type: Action.SnackbarMessage, message: "Submitting joy report" })
+                    }}
+                  />
+                  // <JoyReport
+                  //   initialValues={{
+                  //     ...(state.devBuild && { globalid: knownDuplicateUUID })
+                  //   }}
+                  //   dispatch={dispatch}
+                  //   location={state.location}
+                  //   onCancel={() => dispatch({ type: Action.GoHome })}
+                  //   onSubmit={(f) => {
+                  //     state.log(`Created joy report ${JSON.stringify(f, null, 2)}`)
+                  //     submitToSeeSay2020(
+                  //       state.persisted.userData!,
+                  //       f,
+                  //       state.location!,
+                  //       dispatch,
+                  //       state.log)
+                  //     dispatch({ type: Action.GoHome })
+                  //     dispatch({ type: Action.SnackbarMessage, message: "Submitting awesomeness report" })
+                  //   }}
+                  // />
+                )
+              } else {
+                dispatch({ type: Action.GoHome })
+                return <View><Text>Location permissions are required</Text></View>
               }
           }
         })()}

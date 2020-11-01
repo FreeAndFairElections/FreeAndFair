@@ -7,6 +7,7 @@ export enum Action {
   EditUserData,
   SaveUserData,
   StartProblemReport,
+  StartIntimidationReport,
   StartAwesomeReport,
   DismissSnackbar,
   OpenNavBar,
@@ -36,6 +37,7 @@ export type Command = {
   type: Action.GoHome |
         Action.EditUserData | 
         Action.StartProblemReport |
+        Action.StartIntimidationReport |
         Action.StartAwesomeReport |
         Action.DismissSnackbar |
         Action.OpenNavBar
