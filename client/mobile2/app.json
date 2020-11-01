@@ -12,7 +12,7 @@
     ],
 
     "splash": {
-      "image": "./assets/FreeAndFair2020-splash.png",
+      "image": "./assets/FreeAndFair2020-splash2.png",
       "resizeMode": "cover",
       "backgroundColor": "#206182"
     },
