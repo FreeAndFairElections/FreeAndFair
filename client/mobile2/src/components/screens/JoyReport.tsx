@@ -42,7 +42,6 @@ export const emptyFormData: Form = Object.seal({
   incident_city: "",
   incident_time: `${(new Date()).getTime()}`,  // milliseconds since epoch  
   globalid: `{${uuid.v4()}}`,
-  // globalid: knownDuplicateUUID
 })
 
 const ignore = () => { }
@@ -98,7 +97,7 @@ const JoyReport: FunctionComponent<P> = (props) => {
                 {...(customInput?.component && { InputComponent: customInput.component })}
                 onChangeText={handleChange(p)}
                 onBlur={handleBlur(p)}
-                value={customRender(values[p])}
+                value={customRender(values[p] || "")}
                 label={label}
                 renderErrorMessage={true}
                 inputStyle={{
@@ -126,7 +125,7 @@ const JoyReport: FunctionComponent<P> = (props) => {
                 </Headline>
                 <RadioButton.Group
                   onValueChange={value => handleChange("issue_subtype")(value)}
-                  value={values.issue_subtype}
+                  value={values.issue_subtype || ""}
                 >
                   {radio("Something Humorous", "patience", { backgroundColor: "#f8f8f8", borderTopWidth: 1 })}
                   {radio("Act of Kindness", "kindness")}
