@@ -1,12 +1,29 @@
 {
-  "name": "FreeAndFair",
+  "name": "Free And Fair Elections",
   "displayName": "Free And Fair Elections",
   "expo": {
-    "name": "FreeAndFair",
-    "slug": "FreeAndFair",
-    "version": "1.0.0",
+    "name": "Free And Fair Elections",
+    "icon": "./assets/FreeAndFair2020-icon.png",
+    "version": "0.0.1",
+    
+    "slug": "free-and-fair-elections",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+
+    "splash": {
+      "image": "./assets/FreeAndFair2020-splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#206182"
+    },
+
+    "ios": {
+      "bundleIdentifier": "com.freeandfairelections.freeandfair",
+      "buildNumber": "0.0.1"
+    },
+    "android": {
+      "package": "com.freeandfairelections.freeandfair",
+      "versionCode": 1
+    }
   }
 }

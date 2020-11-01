@@ -121,6 +121,7 @@ const App: FunctionComponent<Props> = (props) => {
     setInterval(startLocation, 10000)
 
     const imageAssets = cacheImages([
+      require('./assets/FreeAndFair2020-splash.png')
       // require('./assets/images/bg_screen1.jpg'),
       // require('./assets/images/bg_screen2.jpg'),
       // require('./assets/images/bg_screen3.jpg'),
@@ -142,7 +143,7 @@ const App: FunctionComponent<Props> = (props) => {
       // { UbuntuLightItalic: require('./assets/fonts/Ubuntu-Light-Italic.ttf') },
     ]);
 
-    await Promise.all([loadPersisted, ...imageAssets, ...fontAssets]);
+    await Promise.all([loadPersisted, /*startLocation(),*/ ...imageAssets, ...fontAssets]);
   };
 
   if (!isReady) {
