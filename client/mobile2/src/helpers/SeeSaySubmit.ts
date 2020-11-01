@@ -1,19 +1,17 @@
 import Axios from 'axios';
 import { LocationObject } from 'expo-location';
 import { Action, Dispatch } from '../actions/Actions';
-import { Form as JoyFormData } from '../components/screens/JoyReport';
 import { Log } from '../types/AppState';
 import { UserData } from '../types/UserData';
 import qs from 'qs'
-
+import SeeSay2020Submission from '../types/SeeSay2020Submission'
 
 const seeSay2020 = "https://services8.arcgis.com/3Y7J7SmaNLGLT6ec/arcgis/rest/services/See_Say_2020_survey/FeatureServer/applyEdits"
 
 const axios = Axios.create({
 })
-// axios.defaults.headers.post["Content-type"] = "application/x-www-form-urlencoded"
 
-export const submitJoy: (u: UserData, f: JoyFormData, l: LocationObject, d: Dispatch, lg: Log) => Promise<void> =
+export const submitToSeeSay2020: (u: UserData, f: SeeSay2020Submission, l: LocationObject, d: Dispatch, lg: Log) => Promise<void> =
   async (userData, formData, location, dispatch, log) => {
     const body = qs.stringify({
       f: "json",

@@ -4,31 +4,31 @@ import React, { FunctionComponent, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Input } from 'react-native-elements';
 import { TextInputMask, TextInputMaskProps } from 'react-native-masked-text';
-import { Button, Headline, RadioButton, Text } from 'react-native-paper';
+import { Button, Headline, RadioButton } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
+import uuid from 'react-native-uuid';
 import { Command } from '../../actions/Actions';
-import DateTime from '../DateTime'; 
-import uuid from 'react-native-uuid'
+import SeeSay2020Submission, { BaseForm, JoyType } from '../../types/SeeSay2020Submission';
+import DateTime from '../DateTime';
 
-export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
-
-export type Form = {
-  issue_type: "joy",
-  issue_subtype: "dancing" | "kindness" | "patience" | "other",
-  description: string,
-  incident_state: string,
-  incident_city: string,
-  // TODO(Dave): Fix this shit.
-  incident_time: string,  // microseconds since epoch
-  globalid: string,
-}
+type Form = SeeSay2020Submission
+// export type Form = {
+//   issue_type: "joy",
+//   issue_subtype: "dancing" | "kindness" | "patience" | "other",
+//   description: string,
+//   incident_state: string,
+//   incident_city: string,
+//   // TODO(Dave): Fix this shit.
+//   incident_time: string,  // microseconds since epoch
+//   globalid: string,
+// }
 type CB = {
   onSubmit: (form: Form) => void,
   onCancel: () => void,
 }
 type P = {
   dispatch: (command: Command) => void,
-  initialValues: Partial<Form>,
+  initialValues: Partial<BaseForm & JoyType>,
   location: LocationObject,
 } & Partial<CB>
 type FormErrors = {
@@ -70,7 +70,7 @@ const JoyReport: FunctionComponent<P> = (props) => {
   return (
     <View style={{ flex: 1 }}>
       <Formik<Form>
-        initialValues={{ ...emptyFormData, ...props.initialValues }}
+        initialValues={{ ...emptyFormData, ...p.initialValues }}
         validateOnChange={true}
         validateOnMount={true}
         validateOnBlur={true}

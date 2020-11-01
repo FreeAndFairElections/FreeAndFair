@@ -25,6 +25,7 @@ type AppState = {
   navBarOpen: boolean;
   location?: Location.LocationObject;
   log: Log;
+  devBuild: boolean;
 
   persisted: Persisted
   persistStore: PersistStore;

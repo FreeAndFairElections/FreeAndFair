@@ -10,9 +10,11 @@ import HomeScreen from './src/components/screens/Home';
 import JoyReport from './src/components/screens/JoyReport';
 import UserInfoScreen from './src/components/screens/UserInfo';
 import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
-import { submitJoy } from './src/helpers/SeeSaySubmit';
+import { submitToSeeSay2020 } from './src/helpers/SeeSaySubmit';
 import AppScreen from './src/types/AppScreen';
 import AppState from './src/types/AppState';
+
+export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
 
 const screenReducer: (s: AppState, c: Command) => AppState = (state, command) => {
   switch (command.type) {
@@ -77,6 +79,7 @@ const App: FunctionComponent<Props> = (props) => {
     navBarOpen: false,
     log: (m, ...p) =>
       (props.exp?.manifest?.packagerOpts?.dev ? console.log(m, p) : undefined),
+    devBuild: props.exp?.manifest?.packagerOpts?.dev ? true : false,
     persistStore: useAsyncStorage("persisted"),
     persisted: {}
   }
@@ -118,10 +121,10 @@ const App: FunctionComponent<Props> = (props) => {
 
     // Update the location every few seconds
     setTimeout(startLocation, 1000)
-    setInterval(startLocation, 10000)
+    setInterval(startLocation, 30000)
 
     const imageAssets = cacheImages([
-      require('./assets/FreeAndFair2020-splash.png')
+      // require('./assets/FreeAndFair2020-splash.png')
       // require('./assets/images/bg_screen1.jpg'),
       // require('./assets/images/bg_screen2.jpg'),
       // require('./assets/images/bg_screen3.jpg'),
@@ -201,13 +204,15 @@ const App: FunctionComponent<Props> = (props) => {
               if (state.location) {
                 return (
                   <JoyReport
-                    initialValues={{}}
+                    initialValues={{
+                      ...(state.devBuild && {globalid: knownDuplicateUUID})
+                    }}
                     dispatch={dispatch}
                     location={state.location}
                     onCancel={() => dispatch({ type: Action.GoHome })}
                     onSubmit={(f) => {
                       state.log(`Created report ${JSON.stringify(f)}`)
-                      submitJoy(
+                      submitToSeeSay2020(
                         state.persisted.userData!, 
                         f, 
                         state.location!, 
