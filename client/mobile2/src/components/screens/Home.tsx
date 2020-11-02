@@ -2,6 +2,7 @@ import React, { FunctionComponent } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, Text } from 'react-native-paper';
 import { Action, Command } from '../../actions/Actions';
+import { Ionicons } from '@expo/vector-icons';
 
 type P = {
   dispatch: (command: Command) => void,
@@ -56,18 +57,18 @@ const HomeScreen: FunctionComponent<P> = (p) => {
 
       <Button
         mode="contained"
-        color="#2020ff"
+        color="#80ff80"
         onPress={() => p.dispatch({ type: Action.StartAwesomeReport })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
       >
-        Report Something Awesome
+        Report Awesomeness
       </Button>
 
       <Button
         mode="contained"
-        color="#80ff80"
+        color="#90ffe8"
         onPress={() => p.dispatch({ type: Action.StartPollTapeReport })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
@@ -89,7 +90,7 @@ export default HomeScreen
 
 const styles = StyleSheet.create({
   buttonInner: {
-    width: 350,
+    width: 400,
     marginVertical: 10,
   },
 
