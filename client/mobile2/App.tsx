@@ -145,6 +145,7 @@ const App: FunctionComponent<Props> = (props) => {
         const locationEndWatch = await Location.watchPositionAsync({
           accuracy: Location.Accuracy.High,
           timeInterval: 5000,
+          distanceInterval: 1000,
           mayShowUserSettingsDialog: true,
         }, (location: LocationObject) => {
           // dispatch({ type: Action.SnackbarMessage, message: "location update", timeoutMillis: 250 })
