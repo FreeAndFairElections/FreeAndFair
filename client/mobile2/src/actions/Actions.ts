@@ -21,7 +21,8 @@ export enum Action {
 
 export type Command = {
   type: Action.SnackbarMessage,
-  message?: string,
+  message: string,
+  timeoutMillis?: number,  // default: 2000ms
 } | {
   type: Action.SaveUserData,
   payload?: UserData

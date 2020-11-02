@@ -23,7 +23,8 @@ export interface Log {
 
 type AppState = {
   screen: AppScreen;
-  homeBanner?: string;
+  snackbarMessage?: string;
+  snackbarTimeoutMillis?: number;
   navBar: RefObject<NavBar>;
   navBarOpen: boolean;
   location?: Location.LocationObject;

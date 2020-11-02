@@ -50,7 +50,11 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
     case Action.StoreDispatch:
       return { ...state, dispatch: command.dispatch }
     case Action.SnackbarMessage:
-      return { ...state, homeBanner: command.message }
+      return {
+        ...state,
+        snackbarMessage: command.message,
+        snackbarTimeoutMillis: command.timeoutMillis
+      }
     case Action.SaveUserData:
       return save({ ...state.persisted, userData: command.payload })
     case Action.LoadedPersistedData:
@@ -72,7 +76,7 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
     case Action.StartPollTapeReport:
       return { ...state, screen: AppScreen.PollTapeReport }
     case Action.DismissSnackbar:
-      return { ...state, homeBanner: undefined }
+      return { ...state, snackbarMessage: undefined, snackbarTimeoutMillis: undefined }
     case Action.OpenNavBar:
       state.navBar.current?.openNav()
       return { ...state }
@@ -157,7 +161,7 @@ const App: FunctionComponent<Props> = (props) => {
 
     // Update the location every few seconds
     setTimeout(startLocation, 1000)
-    setInterval(startLocation, 30000)
+    setInterval(startLocation, 10000)
 
     const imageAssets = cacheImages([
       require('./assets/FreeAndFair2020-splash2.png'),
@@ -254,7 +258,7 @@ const App: FunctionComponent<Props> = (props) => {
                 <HomeScreen
                   dispatch={dispatch}
                   requireUserSetup={!state.persisted.userData}
-                  homeBanner={state.homeBanner}
+                  
                 />
               )
             case AppScreen.UserInfo:
@@ -308,13 +312,13 @@ const App: FunctionComponent<Props> = (props) => {
           }
         })()}
       </NavBar>
-      {state.homeBanner &&
+      {state.snackbarMessage &&
         <Snackbar
-          visible={state.homeBanner ? true : false}
-          duration={2000}
+          visible={state.snackbarMessage ? true : false}
+          duration={state.snackbarMessage ? (state.snackbarTimeoutMillis ?? 2000) : undefined}
           onDismiss={() => dispatch({ type: Action.DismissSnackbar })}
         >
-          {state.homeBanner}
+          {state.snackbarMessage}
         </Snackbar>
       }
     </PaperProvider>
