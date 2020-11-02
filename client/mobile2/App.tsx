@@ -13,34 +13,36 @@ import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
 import { submitToSeeSay2020 } from './src/helpers/SeeSaySubmit';
 import { drop, pick } from './src/helpers/TypeFunctions';
 import AppScreen from './src/types/AppScreen';
-import AppState from './src/types/AppState';
+import AppState, { Persisted } from './src/types/AppState';
 import SeeSay2020Submission, { FormSelectors, formSelectors } from './src/types/SeeSay2020Submission';
-
+import ReverseGeocode, { ILocation, IGeocode } from "bigdatacloud-reverse-geocoding";
 
 
 export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
 
 const screenReducer: (s: AppState, c: Command) => AppState = (state, command) => {
+  const save = (newPersisted: Persisted) => {
+    const toSave = JSON.stringify(newPersisted)
+    state.log(`Saving user info: ${toSave}`)
+
+    state.persistStore.setItem(toSave, (error?: Error) => {
+      error && state.dispatch?.({
+        type: Action.SnackbarMessage,
+        message: `App data save failed: ${error.message}`,
+      })
+    })
+    return {
+      ...state,
+      persisted: newPersisted
+    }
+  }
   switch (command.type) {
     case Action.StoreDispatch:
       return { ...state, dispatch: command.dispatch }
     case Action.SnackbarMessage:
       return { ...state, homeBanner: command.message }
     case Action.SaveUserData:
-      const newPersisted = { ...state.persisted, userData: command.payload }
-      const toSave = JSON.stringify(newPersisted)
-      state.log(`Saving user info: ${toSave}`)
-
-      state.persistStore.setItem(toSave, (error?: Error) => {
-        error && state.dispatch?.({
-          type: Action.SnackbarMessage,
-          message: `Save failed: ${error.message}`,
-        })
-      })
-      return {
-        ...state,
-        persisted: newPersisted
-      }
+      return save({ ...state.persisted, userData: command.payload })
     case Action.LoadedPersistedData:
       state.log(`Loaded data: ${JSON.stringify(command.payload)}`)
       return {
@@ -66,6 +68,12 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
       return { ...state }
     case Action.UpdateLocation:
       return { ...state, location: command.location }
+    case Action.UpdateGeocodeHints:
+      return save({
+        ...state.persisted,
+        cityHint: command.cityHint,
+        stateHint: command.stateHint
+      })
   }
 }
 
@@ -122,6 +130,16 @@ const App: FunctionComponent<Props> = (props) => {
         //   type: Action.SnackbarMessage,
         //   message: `Got location: ${location.coords.latitude} ${location.coords.longitude}`
         // })
+        const geocode = new ReverseGeocode
+        const place = geocode.locate({ lat: location.coords.latitude, long: location.coords.longitude })
+        place.then(v => {
+          state.log(`Geocoded to ${JSON.stringify(v, null, 2)}`)
+          dispatch({
+            type: Action.UpdateGeocodeHints,
+            cityHint: (v as any).city,
+            stateHint: ((v as any).principalSubdivisionCode as string | undefined)?.slice(3)
+          })
+        }, (e) => { state.log(`Failed to geocode: ${JSON.stringify(e, null, 2)}`) })
 
         // mapRef.current?.animateCamera({center: location.coords, zoom: 16})
       }
@@ -176,6 +194,8 @@ const App: FunctionComponent<Props> = (props) => {
       return (
         <IncidentReport
           initialValues={{
+            incident_city: state.persisted.cityHint,
+            incident_state: state.persisted.stateHint,
             ...initial,
             ...(state.devBuild && { globalid: knownDuplicateUUID }),
           }}

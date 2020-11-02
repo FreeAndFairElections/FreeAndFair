@@ -6,7 +6,10 @@ import { Dispatch } from '../actions/Actions';
 import Location from 'expo-location';
 
 export type Persisted = {
-  userData?: UserData
+  userData?: UserData,
+
+  cityHint?: string,
+  stateHint?: string,
 }
 
 export type PersistStore = {
@@ -27,7 +30,7 @@ type AppState = {
   log: Log;
   devBuild: boolean;
 
-  persisted: Persisted
+  persisted: Persisted;
   persistStore: PersistStore;
   dispatch?: Dispatch;
 }

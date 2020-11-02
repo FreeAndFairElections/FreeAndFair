@@ -16,6 +16,7 @@ export enum Action {
   LoadedPersistedData,
   StoreDispatch,
   UpdateLocation,
+  UpdateGeocodeHints,
 }
 
 export type Command = {
@@ -33,6 +34,10 @@ export type Command = {
 } | {
   type: Action.UpdateLocation,
   location: LocationObject,
+} | {
+  type: Action.UpdateGeocodeHints,
+  cityHint?: string,
+  stateHint?: string,
 } | {
   // No-payload actions
   type: Action.GoHome |

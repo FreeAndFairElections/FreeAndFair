@@ -84,6 +84,8 @@ const IncidentReport: FunctionComponent<P> = (props) => {
     if (!f.incident_state || f.incident_state.length != 2)
       errors.incident_state = "Missing State"
 
+    if (!f.description)
+      errors.description = "Missing Description"
     return errors
   }
 
@@ -123,10 +125,13 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                 key={label}
                 label={label}
                 renderErrorMessage={true}
+                inputContainerStyle={{
+                  ...(touched[p] && errors[p] && {backgroundColor: "#ffe0e0"})
+                }}
                 inputStyle={{
                   ...styles.text,
                   // The red error background seems to cause text fields to scroll within the containing view!  :(
-                  // ...(touched[p] && errors[p] && badValue(p))
+                  // ...(touched[p] && errors[p] && {backgroundColor: "#ffe0e0"})
                 }}
                 {...(customInput?.props)}
                 {...(touched[p] && { errorMessage: errors[p] })}
@@ -146,12 +151,6 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   .filter(k => p.display?.(p.formStructure[k]!) ?? true)
                   .length > 1 &&
                   <View>
-                    {/* <Headline key="maintitle" style={{
-                      margin: 5,
-                      marginVertical: 10,
-                    }}>
-                      What happened?
-                    </Headline> */}
                     <List.Accordion
                       title="What happened?"
                       expanded={topVisible}
@@ -168,7 +167,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                           const updateSubtype = value !== values.issue_type
                           handleChange("issue_type")(value)
                           setTopVisible(false)
-                          setMidVisible(manyMid(values.issue_type))
+                          setMidVisible(manyMid(value as keyof FormSelectors))
 
                           if (updateSubtype) {
                             handleChange("issue_subtype")(
@@ -194,17 +193,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   </View>
                 }
 
-                {/* TODO(Dave): This doesn't seem to actually do anything.  Why? */}
-                {/* <Divider key="midborder" style={{ borderBottomWidth: 1 }} /> */}
-
-
                 {/* Secondary issue type */}
-                {/* <Headline key="subtitle" style={{
-                  margin: 5,
-                  marginVertical: 10,
-                }}>
-                  ...more specifically:
-                </Headline> */}
                 <List.Accordion
                   title="...more specifically:"
                   titleStyle={styles.headline}
