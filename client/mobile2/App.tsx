@@ -18,6 +18,8 @@ import AppState, { Persisted } from './src/types/AppState';
 import SeeSay2020Submission, { FormSelectors, formSelectors } from './src/types/SeeSay2020Submission';
 import ReverseGeocode, { ILocation, IGeocode } from "bigdatacloud-reverse-geocoding";
 import { LocationObject } from 'expo-location';
+import { useBackHandler } from '@react-native-community/hooks'
+import Screen from './src/types/AppScreen'
 
 
 export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
@@ -118,6 +120,16 @@ const App: FunctionComponent<Props> = (props) => {
   }
   const [state, dispatch] = useReducer(screenReducer, initialState)
   const [isReady, setIsReady] = useState(false)
+
+  useBackHandler(() => {
+    if (state.screen !== Screen.Home) {
+      // handle it
+      dispatch({ type: Action.GoHome })
+      return true
+    }
+    // let the default thing happen
+    return false
+  })
 
   const loadInitialAsync = async () => {
     const loadPersisted = state.persistStore.getItem((error?: Error, result?: string) => {
