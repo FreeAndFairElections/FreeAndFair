@@ -4,9 +4,11 @@
   "expo": {
     "name": "Free And Fair Elections",
     "icon": "./assets/FreeAndFair2020-icon4.png",
-    "version": "0.0.1",
+    "version": "1.0.0",
     
     "slug": "free-and-fair-elections",
+    "orientation": "portrait",
+
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -19,11 +21,19 @@
 
     "ios": {
       "bundleIdentifier": "com.freeandfairelections.freeandfair",
-      "buildNumber": "0.0.1"
+      "buildNumber": "1.0.0"
     },
     "android": {
       "package": "com.freeandfairelections.freeandfair",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COURSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     }
   }
 }

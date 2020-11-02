@@ -5,6 +5,7 @@ enum AppScreen {
   IntimidationReport,
   ProblemReport,
   JoyReport,
+  PollTapeReport,
 }
 
 export default AppScreen

@@ -4,7 +4,7 @@ import React, { FunctionComponent, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Input } from 'react-native-elements';
 import { TextInputMask, TextInputMaskProps } from 'react-native-masked-text';
-import { Button, Headline, RadioButton } from 'react-native-paper';
+import { Button, Headline, List, RadioButton } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import uuid from 'react-native-uuid';
 import { Command } from '../../actions/Actions';
@@ -66,7 +66,14 @@ const IncidentReport: FunctionComponent<P> = (props) => {
     ...props,
     display: props.display ?? defaults.display
   }
+
+  const manyTop = Object.keys(p.formStructure).length > 1
+  const manyMid: (k: keyof FormSelectors) => boolean =
+    k => Object.keys(p.formStructure[k]?.subtypes || {}).length > 1
+
   const [dateVisible, setDateVisible] = useState(false)
+  const [topVisible, setTopVisible] = useState(manyTop)
+  const [midVisible, setMidVisible] = useState(manyMid(p.initialValues.issue_type))
 
   const validate: (f: Form) => void | object = (f) => {
     const errors: FormErrors = {}
@@ -139,64 +146,96 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   .filter(k => p.display?.(p.formStructure[k]!) ?? true)
                   .length > 1 &&
                   <View>
-                    <Headline key="maintitle" style={{
+                    {/* <Headline key="maintitle" style={{
                       margin: 5,
                       marginVertical: 10,
                     }}>
                       What happened?
-                    </Headline>
-                    <RadioButton.Group
-                      onValueChange={value => {
-                        const updateSubtype = value !== values.issue_type
-                        handleChange("issue_type")(value)
-                        if (updateSubtype) {
-                          handleChange("issue_subtype")(
-                            Object.keys(p.formStructure[value as keyof FormSelectors]!.subtypes)[0])
-                          // TODO(Dave): Select the first option.
-                        }
+                    </Headline> */}
+                    <List.Accordion
+                      title="What happened?"
+                      expanded={topVisible}
+                      {...(!topVisible
+                        && { description: p.formStructure[values.issue_type]!.label })}
+                      onPress={() => {
+                        setTopVisible(v => !v)
+                        setMidVisible(manyMid(values.issue_type))
                       }}
-                      value={values.issue_type || ""}
+                      titleStyle={styles.headline}
                     >
-                      {typedKeys(p.formStructure)
-                        .filter(k => p.display?.(p.formStructure[k]!) ?? true)
-                        .flatMap((k, i, a) =>
-                          (p.display?.(p.formStructure[k]!) ?? true) ?
-                            [radio(p.formStructure[k]!.label, k, {
-                              // Alternate background shades
-                              ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
-                              // ...(i === 0 ? { borderTopWidth: 1 } : {}),
-                              ...(i === a.length - 1 ? { borderBottomWidth: 1 } : {}),
-                            })] :
-                            []
-                        )}
-                    </RadioButton.Group>
+                      <RadioButton.Group
+                        onValueChange={value => {
+                          const updateSubtype = value !== values.issue_type
+                          handleChange("issue_type")(value)
+                          setTopVisible(false)
+                          setMidVisible(manyMid(values.issue_type))
+
+                          if (updateSubtype) {
+                            handleChange("issue_subtype")(
+                              Object.keys(p.formStructure[value as keyof FormSelectors]!.subtypes)[0])
+                          }
+                        }}
+                        value={values.issue_type || ""}
+                      >
+                        {typedKeys(p.formStructure)
+                          .filter(k => p.display?.(p.formStructure[k]!) ?? true)
+                          .flatMap((k, i, a) =>
+                            (p.display?.(p.formStructure[k]!) ?? true) ?
+                              [radio(p.formStructure[k]!.label, k, {
+                                // Alternate background shades
+                                ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
+                                // ...(i === 0 ? { borderTopWidth: 1 } : {}),
+                                ...(i === a.length - 1 ? { borderBottomWidth: 1 } : {}),
+                              })] :
+                              []
+                          )}
+                      </RadioButton.Group>
+                    </List.Accordion>
                   </View>
                 }
 
                 {/* TODO(Dave): This doesn't seem to actually do anything.  Why? */}
                 {/* <Divider key="midborder" style={{ borderBottomWidth: 1 }} /> */}
-                <Headline key="subtitle" style={{
+
+
+                {/* Secondary issue type */}
+                {/* <Headline key="subtitle" style={{
                   margin: 5,
                   marginVertical: 10,
                 }}>
                   ...more specifically:
-                </Headline>
-
-                {/* Secondary issue type */}
-                <RadioButton.Group
-                  onValueChange={value => handleChange("issue_subtype")(value)}
-                  value={values.issue_subtype || ""}
+                </Headline> */}
+                <List.Accordion
+                  title="...more specifically:"
+                  titleStyle={styles.headline}
+                  expanded={midVisible}
+                  {...(!midVisible
+                    && { 
+                      // Yuck, this `as any` is shitty.
+                      description: (p.formStructure[values.issue_type]!.subtypes as any)[values.issue_subtype]
+                    })}
+                  onPress={() => {
+                    setMidVisible(v => !v)
+                  }}
                 >
-                  {Object.entries(p.formStructure[values.issue_type as keyof FormSelectors]?.subtypes ?? {})
-                    .map(([k, v], i, a) =>
-                      radio(v, k, {
-                        //  Alternate background shades
-                        ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
-                        // ...(i === 0 ? { borderTopWidth: 1 } : {}),
-                        ...(i === a.length - 1 ? { borderBottomWidth: 1 } : {}),
-                      })
-                    )}
-                </RadioButton.Group>
+                  <RadioButton.Group
+                    onValueChange={value => {
+                      setMidVisible(false)
+                      handleChange("issue_subtype")(value)
+                    }}
+                    value={values.issue_subtype || ""}
+                  >
+                    {Object.entries(p.formStructure[values.issue_type]?.subtypes ?? {})
+                      .map(([k, v], i, a) =>
+                        radio(v, k, {
+                          //  Alternate background shades
+                          ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
+                          // ...(i === 0 ? { borderTopWidth: 1 } : {}),
+                          ...(i === a.length - 1 ? { borderBottomWidth: 1 } : {}),
+                        })
+                      )}
+                  </RadioButton.Group>
+                </List.Accordion>
 
                 {/* City & State */}
                 {textInput("incident_city", "City")}
@@ -292,4 +331,11 @@ const styles = StyleSheet.create({
     padding: 2,
     fontSize: 24,
   },
+
+  headline: {
+    fontSize: 24,
+    lineHeight: 32,
+    marginVertical: 2,
+    letterSpacing: 0
+  }
 })

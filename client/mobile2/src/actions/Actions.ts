@@ -9,6 +9,7 @@ export enum Action {
   StartProblemReport,
   StartIntimidationReport,
   StartAwesomeReport,
+  StartPollTapeReport,
   DismissSnackbar,
   OpenNavBar,
   SnackbarMessage,
@@ -39,6 +40,7 @@ export type Command = {
         Action.StartProblemReport |
         Action.StartIntimidationReport |
         Action.StartAwesomeReport |
+        Action.StartPollTapeReport |
         Action.DismissSnackbar |
         Action.OpenNavBar
 }

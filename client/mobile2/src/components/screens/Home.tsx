@@ -33,23 +33,35 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
-      >Report Voter Intimidation</Button>
+      >Voter Intimidation</Button>
 
       <Button
         mode="contained"
+        color="#2020ff"
         onPress={() => p.dispatch({ type: Action.StartProblemReport })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
-      >Report Election Problems</Button>
+      >Election Problems</Button>
 
       <Button
         mode="contained"
+        color="#2020ff"
         onPress={() => p.dispatch({ type: Action.StartAwesomeReport })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
-      >Report Something Awesome</Button>
+      >Something Awesome</Button>
+      {p.children}
+
+      <Button
+        mode="contained"
+        color="#80ff80"
+        onPress={() => p.dispatch({ type: Action.StartPollTapeReport })}
+        contentStyle={styles.buttonInner}
+        style={styles.buttonOuter}
+        {...(p.requireUserSetup && { disabled: true })}
+      >Poll Tape Report Photos</Button>
       {p.children}
     </View>
   )
