@@ -1,4 +1,5 @@
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+// import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { AsyncStorage } from 'react-native';
 import { AppLoading } from 'expo';
 import * as Location from 'expo-location';
 import React, { FunctionComponent, useReducer, useRef, useState } from 'react';
@@ -19,6 +20,15 @@ import ReverseGeocode, { ILocation, IGeocode } from "bigdatacloud-reverse-geocod
 
 
 export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
+
+const useAsyncStorage = (key: string)/*: AsyncStorageHook*/ => {
+  return {
+    getItem: (cb: any) => AsyncStorage.getItem(key, cb),
+    setItem: (val: string, cb: any) => AsyncStorage.setItem(key, val, cb),
+    mergeItem: (val: string, cb: any) => AsyncStorage.mergeItem(key, val, cb),
+    removeItem: (cb: any) => AsyncStorage.removeItem(key, cb),
+  };
+}
 
 const screenReducer: (s: AppState, c: Command) => AppState = (state, command) => {
   const save = (newPersisted: Persisted) => {
