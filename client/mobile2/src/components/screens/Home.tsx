@@ -12,14 +12,14 @@ type P = {
 const HomeScreen: FunctionComponent<P> = (p) => {
   return (
     <ScrollView
-    style={{
-      margin: 10,
-      flexDirection: "column",
-      flexGrow: 1
-    }}
-    contentContainerStyle={{
-      alignItems: "center",
-    }}
+      style={{
+        margin: 10,
+        flexDirection: "column",
+        flexGrow: 1
+      }}
+      contentContainerStyle={{
+        alignItems: "center",
+      }}
     >
       <Text style={styles.text}>What would you like to do?</Text>
 
@@ -28,7 +28,9 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         onPress={() => p.dispatch({ type: Action.EditUserData })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
-      >Edit User Info</Button>
+      >
+        Edit User Info
+      </Button>
 
       <Button
         mode="contained"
@@ -37,7 +39,9 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
-      >Voter Intimidation</Button>
+      >
+        Report Voter Intimidation
+      </Button>
 
       <Button
         mode="contained"
@@ -46,7 +50,9 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
-      >Election Problems</Button>
+      >
+        Report Election Problems
+      </Button>
 
       <Button
         mode="contained"
@@ -55,8 +61,9 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
-      >Something Awesome</Button>
-      {p.children}
+      >
+        Report Something Awesome
+      </Button>
 
       <Button
         mode="contained"
@@ -65,8 +72,12 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
-      >Poll Tape Report Photos</Button>
+      >
+        Poll Tape Report Photos
+      </Button>
+
       {p.children}
+
       {p.debugOutput &&
         <View><Divider /><Text>{p.debugOutput}</Text></View>
       }
