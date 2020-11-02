@@ -1,7 +1,7 @@
 import { Formik } from 'formik';
 import { PhoneNumberUtil } from "google-libphonenumber";
 import React, { FunctionComponent } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Input } from 'react-native-elements';
 import { TextInputMask, TextInputMaskProps } from 'react-native-masked-text';
 import { Button, Headline } from 'react-native-paper';
@@ -94,6 +94,9 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
                 value={values[p]}
                 label={label}
                 renderErrorMessage={true}
+                inputContainerStyle={{
+                  ...(touched[p] && errors[p] && {backgroundColor: "#ffe0e0"})
+                }}
                 inputStyle={{
                   ...styles.text,
                   // The red error background seems to cause text fields to scroll within the containing view!  :(
