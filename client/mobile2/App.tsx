@@ -55,6 +55,8 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
         snackbarMessage: command.message,
         snackbarTimeoutMillis: command.timeoutMillis
       }
+    case Action.HomeDebugMessage:
+      return { ...state, homeDebugMessage: state.devBuild ? command.message : undefined, }
     case Action.SaveUserData:
       return save({ ...state.persisted, userData: command.payload })
     case Action.LoadedPersistedData:
@@ -258,7 +260,7 @@ const App: FunctionComponent<Props> = (props) => {
                 <HomeScreen
                   dispatch={dispatch}
                   requireUserSetup={!state.persisted.userData}
-                  
+                  debugOutput={state.homeDebugMessage}
                 />
               )
             case AppScreen.UserInfo:

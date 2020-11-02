@@ -1,22 +1,26 @@
 import React, { FunctionComponent } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Divider, Text } from 'react-native-paper';
 import { Action, Command } from '../../actions/Actions';
 
 type P = {
   dispatch: (command: Command) => void,
-  homeBanner?: string,
   requireUserSetup: boolean,
+  debugOutput?: string,
 }
 
 const HomeScreen: FunctionComponent<P> = (p) => {
   return (
-    <View style={{
-      alignItems: "center",
+    <ScrollView
+    style={{
       margin: 10,
       flexDirection: "column",
       flexGrow: 1
-    }}>
+    }}
+    contentContainerStyle={{
+      alignItems: "center",
+    }}
+    >
       <Text style={styles.text}>What would you like to do?</Text>
 
       <Button
@@ -63,7 +67,10 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         {...(p.requireUserSetup && { disabled: true })}
       >Poll Tape Report Photos</Button>
       {p.children}
-    </View>
+      {p.debugOutput &&
+        <View><Divider /><Text>{p.debugOutput}</Text></View>
+      }
+    </ScrollView>
   )
 
 }

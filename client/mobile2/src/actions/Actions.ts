@@ -13,6 +13,7 @@ export enum Action {
   DismissSnackbar,
   OpenNavBar,
   SnackbarMessage,
+  HomeDebugMessage,
   LoadedPersistedData,
   StoreDispatch,
   UpdateLocation,
@@ -23,6 +24,9 @@ export type Command = {
   type: Action.SnackbarMessage,
   message: string,
   timeoutMillis?: number,  // default: 2000ms
+} | {
+  type: Action.HomeDebugMessage,
+  message: string,
 } | {
   type: Action.SaveUserData,
   payload?: UserData

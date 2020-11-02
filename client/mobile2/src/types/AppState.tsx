@@ -25,6 +25,7 @@ type AppState = {
   screen: AppScreen;
   snackbarMessage?: string;
   snackbarTimeoutMillis?: number;
+  homeDebugMessage?: string;
   navBar: RefObject<NavBar>;
   navBarOpen: boolean;
   location?: Location.LocationObject;
