@@ -17,6 +17,7 @@ import AppScreen from './src/types/AppScreen';
 import AppState, { Persisted } from './src/types/AppState';
 import SeeSay2020Submission, { FormSelectors, formSelectors } from './src/types/SeeSay2020Submission';
 import ReverseGeocode, { ILocation, IGeocode } from "bigdatacloud-reverse-geocoding";
+import { LocationObject } from 'expo-location';
 
 
 export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
@@ -125,7 +126,7 @@ const App: FunctionComponent<Props> = (props) => {
         state.log(`Load failed: ${JSON.stringify(error)}`)
       }
       if (result) {
-        dispatch({ type: Action.SnackbarMessage, message: "Loaded app data" })
+        // dispatch({ type: Action.SnackbarMessage, message: "Loaded app data" })
         dispatch({ type: Action.LoadedPersistedData, payload: JSON.parse(result) || {} })
         state.log(`Loaded: ${result}`)
       }
@@ -139,31 +140,65 @@ const App: FunctionComponent<Props> = (props) => {
           type: Action.SnackbarMessage,
           message: "Required Location Permission Denied"
         })
+        setTimeout(startLocation, 5000)
       } else {
-        let location = await Location.getCurrentPositionAsync({});
-        dispatch({ type: Action.UpdateLocation, location: location })
-        // dispatch({
-        //   type: Action.SnackbarMessage,
-        //   message: `Got location: ${location.coords.latitude} ${location.coords.longitude}`
-        // })
-        const geocode = new ReverseGeocode
-        const place = geocode.locate({ lat: location.coords.latitude, long: location.coords.longitude })
-        place.then(v => {
-          state.log(`Geocoded to ${JSON.stringify(v, null, 2)}`)
-          dispatch({
-            type: Action.UpdateGeocodeHints,
-            cityHint: (v as any).city,
-            stateHint: ((v as any).principalSubdivisionCode as string | undefined)?.slice(3)
+        const locationEndWatch = await Location.watchPositionAsync({
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000,
+          mayShowUserSettingsDialog: true,
+        }, (location: LocationObject) => {
+          // dispatch({ type: Action.SnackbarMessage, message: "location update", timeoutMillis: 250 })
+          dispatch({ type: Action.UpdateLocation, location: location })
+          // dispatch({
+          //   type: Action.SnackbarMessage,
+          //   message: `Got location: ${location.coords.latitude} ${location.coords.longitude}`,
+          //   timeoutMillis: 500,
+          // })
+          const geocode = new ReverseGeocode
+          const place = geocode.locate({
+            lat: location.coords.latitude,
+            long: location.coords.longitude
           })
-        }, (e) => { state.log(`Failed to geocode: ${JSON.stringify(e, null, 2)}`) })
+          place.then(v => {
+            state.log(`Geocoded to ${JSON.stringify(v, null, 2)}`)
+            var city = (v as any).city
+            if (!city) {
+              for (const level of (((v as any).localityInfo.administrative) as { name: string, adminLevel: number }[]).reverse())
+                if (level.adminLevel < 9 && level.adminLevel >= 6) {
+                  city = level.name
+                  break
+                }
+            }
+            const stateAbbrev = ((v as any).principalSubdivisionCode as string | undefined)?.slice(3)
+
+            // Debug stuff
+            if (state.devBuild) {
+              // dispatch({
+              //   type: Action.HomeDebugMessage,
+              //   // message: `Geocoded to: ${JSON.stringify(v, null, 2)}`
+              //   message: `Got location: ${city}, ${stateAbbrev}`
+              // })
+              if (city !== state.persisted.cityHint || stateAbbrev !== state.persisted.stateHint) {
+                dispatch({
+                  type: Action.SnackbarMessage,
+                  message: `Got location: ${city}, ${stateAbbrev}`
+                })
+              }
+            }
+
+            dispatch({
+              type: Action.UpdateGeocodeHints,
+              cityHint: city,
+              stateHint: stateAbbrev,
+            })
+          }, (e) => { state.log(`Failed to geocode: ${JSON.stringify(e, null, 2)}`) })
+        })
 
         // mapRef.current?.animateCamera({center: location.coords, zoom: 16})
       }
     })
 
-    // Update the location every few seconds
-    setTimeout(startLocation, 1000)
-    setInterval(startLocation, 10000)
+    setTimeout(startLocation, 500)
 
     const imageAssets = cacheImages([
       require('./assets/FreeAndFair2020-splash2.png'),
