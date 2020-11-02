@@ -23,7 +23,10 @@
 
     "ios": {
       "bundleIdentifier": "com.freeandfairelections.freeandfair",
-      "buildNumber": "1.0.2"
+      "buildNumber": "1.0.2",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to record posted poll tapes, or capture other election integrity related incidents."
+      }
     },
     "android": {
       "package": "com.freeandfairelections.freeandfair",
