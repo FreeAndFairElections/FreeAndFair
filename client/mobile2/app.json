@@ -4,7 +4,9 @@
   "expo": {
     "name": "Free And Fair Elections",
     "icon": "./assets/FreeAndFair2020-icon4.png",
-    "version": "1.0.0",
+    "description": "Crowdsourced Election Integrity. Keeping elections safe, free, fair. Keeping voters and media informed about what's happening when there's trouble.",
+    
+    "version": "1.0.2",
     
     "slug": "free-and-fair-elections",
     "orientation": "portrait",
@@ -21,11 +23,11 @@
 
     "ios": {
       "bundleIdentifier": "com.freeandfairelections.freeandfair",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.2"
     },
     "android": {
       "package": "com.freeandfairelections.freeandfair",
-      "versionCode": 1,
+      "versionCode": 3,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
