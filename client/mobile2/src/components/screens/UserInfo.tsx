@@ -195,6 +195,6 @@ const styles = StyleSheet.create({
   text: {
     margin: 10,
     padding: 2,
-    fontSize: 24,
+    fontSize: 18,
   },
 })
