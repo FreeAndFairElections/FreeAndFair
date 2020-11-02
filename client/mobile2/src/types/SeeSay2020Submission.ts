@@ -1,17 +1,14 @@
 
-export type NullKey = "<<NullKey>>"
-const nullKey: NullKey = "<<NullKey>>"
-
 type IssueKeys = {
   registration: "not_listed" | "name_incorrect" | "already_voted" | "other"
-  machine: NullKey 
+  machine: "other"
   intimidation: "polling_place_interference" | "eligibility_challenged" | "perusade_voter" | "non_authorized_person" | "advertising" | "other"
   place: "longlines" | "closed" | "poll_worker" | "poll_tape" | "interfere" | "other"
   ballot: "absentee" | "provisional_not_offered" | "missing" | "ballot_removal" | "other"
   access: "language" | "disability" | "other"
   misinformation: "news" | "text" | "email" | "social_media" | "other"
   law: "assist" | "response" | "other"
-  courts: NullKey
+  courts: "other"
   joy: "dancing" | "kindness" | "patience" | "other"
   polltape: "photo" | "photo_missing"
   other: "fraud" | "other"
@@ -27,131 +24,124 @@ export type IssueTypeDetails<ST> = {
 }
 
 export type FormSelectors = {
-  [K in keyof IssueKeys]: IssueTypeDetails<IssueKeys[K]>
+  [K in keyof IssueKeys]: {
+    label: string,
+    goodThing?: true,
+    subtypes: {
+      [K2 in IssueKeys[K]]: string
+    }
+  }
 }
 
-export const formSelectors: FormSelectors = {
+export const formSelectors: Readonly<FormSelectors> = {
   registration: {
     label: "Voter Check-in Problems",
-    subtypes: [
-      { subtype: "not_listed", label: "Voter not present in voter rolls" },
-      { subtype: "name_incorrect", label: "Incorrect voter name or address" },
-      { subtype: "already_voted", label: "Voter shown as already voted" },
-      { subtype: "other", label: "Some other issue" },
-    ]
+    subtypes: {
+      not_listed: "Voter not present in voter rolls",
+      name_incorrect: "Incorrect voter name or address",
+      already_voted: "Voter shown as already voted",
+      other: "Some other issue",
+    },
   },
   machine: {
     label: "Problems With Voting Machine",
-    subtypes: [
-      { subtype: nullKey, label: "Some problem (explain below)" }
-    ],
+    subtypes: {
+      other: "Some problem (explain below)"
+    },
   },
   intimidation: {
     label: "Voter Intimidation",
-    subtypes: [
-      { subtype: "polling_place_interference", label: "Voting interference / Poll obstruction" },
-      { subtype: "eligibility_challenged", label: "ID requested or Eligibility challenged" },
-      { subtype: "perusade_voter", label: "Attempt to persuade voter in line" },
-      { subtype: "non_authorized_person", label: "Unauthorized people present" },
-      { subtype: "advertising", label: "Wrongful electioneering" },
-      { subtype: "other", label: "Some other issue" },
-    ]
+    subtypes: {
+      polling_place_interference: "Voting interference / Poll obstruction",
+      eligibility_challenged: "ID requested or Eligibility challenged",
+      perusade_voter: "Attempt to persuade voter in line",
+      non_authorized_person: "Unauthorized people present",
+      advertising: "Wrongful electioneering",
+      other: "Some other issue",
+    },
   },
   place: {
     label: "Polling Place Issues",
-    subtypes: [
-      { subtype: "longlines", label: "Long waiting lines to vote" },
-      { subtype: "closed", label: "Location closed / moved / inconvenient" },
-      { subtype: "poll_worker", label: "Problems with poll worker" },
-      { subtype: "poll_tape", label: "Problems with poll tape" },
-      { subtype: "interfere", label: "Interference or Obstruction of Voter" },
-      { subtype: "other", label: "Some other issue" },
-    ]
+    subtypes: {
+      longlines: "Long waiting lines to vote",
+      closed: "Location closed / moved / inconvenient",
+      poll_worker: "Problems with poll worker",
+      poll_tape: "Problems with poll tape",
+      interfere: "Interference or Obstruction of Voter",
+      other: "Some other issue",
+    },
   },
   ballot: {
     label: "Ballot Issues",
-    subtypes: [
-      { subtype: "absentee", label: "Problems with Absentee ballot" },
-      { subtype: "provisional_not_offered", label: "Provisional or affidavit ballot not offered" },
-      { subtype: "missing", label: "Candidate / Race is missing or incorrect" },
-      { subtype: "ballot_removal", label: "Ballot removal" },
-      { subtype: "other", label: "Some other issue" },
-    ]
+    subtypes: {
+      absentee: "Problems with Absentee ballot",
+      provisional_not_offered: "Provisional or affidavit ballot not offered",
+      missing: "Candidate / Race is missing or incorrect",
+      ballot_removal: "Ballot removal",
+      other: "Some other issue",
+    },
   },
   access: {
     label: "Equal Access",
-    subtypes: [
-      { subtype: "language", label: "Language access problems" },
-      { subtype: "disability", label: "Disability access problems" },
-      { subtype: "other", label: "Some other issue" },
-    ]
+    subtypes: {
+      language: "Language access problems",
+      disability: "Disability access problems",
+      other: "Some other issue",
+    },
   },
   misinformation: {
     label: "Misinformation",
-    subtypes: [
-      { subtype: "news", label: "News" },
-      { subtype: "text", label: "SMS / Text message" },
-      { subtype: "email", label: "Email" },
-      { subtype: "social_media", label: "Facebook / Social media" },
-      { subtype: "other", label: "Some other venue" },
-    ]
+    subtypes: {
+      news: "News",
+      text: "SMS / Text message",
+      email: "Email",
+      social_media: "Facebook / Social media",
+      other: "Some other venue",
+    },
   },
   law: {
     label: "Problems with Law Enforcement",
-    subtypes: [
-      { subtype: "assist", label: "Refusing assistance" },
-      { subtype: "response", label: "Aggressive or inappropriate response" },
-      { subtype: "other", label: "Some other issue" },
-    ]
+    subtypes: {
+      assist: "Refusing assistance",
+      response: "Aggressive or inappropriate response",
+      other: "Some other issue",
+    },
   },
   courts: {
     label: "Courts",
-    subtypes: [
-      { subtype: nullKey, label: "Some problem (explain below)" },
-    ]
+    subtypes: {
+      other: "Some problem (explain below)",
+    },
   },
   polltape: {
     label: "Record Poll Tape / records",
-    subtypes: [
-      { subtype: "photo", label: "Attach a photo of the poll tape" },
-      { subtype: "photo_missing", label: "Poll tape not posted or available" },
-    ]
+    subtypes: {
+      photo: "Attach a photo of the poll tape",
+      photo_missing: "Poll tape not posted or available",
+    },
   },
   joy: {
     label: "Something Awesome",
     goodThing: true,
-    subtypes: [
-      { subtype: "patience", label: "Something Funny" },
-      { subtype: "kindness", label: "Act of Kindness" },
-      { subtype: "dancing", label: "Dancing" },
-      { subtype: "other", label: "Some Other Awesome Thing" },
-      // TODO(Dave): Implement these maybe?
-    ]
+    subtypes: {
+      patience: "Something Funny",
+      kindness: "Act of Kindness",
+      dancing: "Dancing",
+      other: "Some Other Awesome Thing",
+    },
   },
   other: {
     label: "Fraud or Other Issues",
-    subtypes: [
-      { subtype: "other", label: "Some other issue" },
-      { subtype: "fraud", label: "Fraud allegation" },
-    ]
+    subtypes: {
+      other: "Some other issue",
+      fraud: "Fraud allegation",
+    },
   },
-}
+} as const
 
-
-export type JoyType = {
-  issue_type: "joy",
-  issue_subtype: "dancing" | "kindness" | "patience" | "other",
-}
-
-// TODO(Dave): This is a really fast&loose type for expedience...
-export type ProblemType = {
-  issue_type: keyof IssueKeys,
-  issue_subtype: string,
-}
-
-type AllIssueTypes =
-  JoyType |
-  ProblemType
+type Munge<T> =
+  { [K in keyof T]: { issue_type: K, issue_subtype: T[K] } }[keyof T];
+export type IssueTypes = Munge<IssueKeys>
 
 export type BaseForm = {
   description: string,
@@ -162,5 +152,20 @@ export type BaseForm = {
   globalid: string,
 }
 
-type SeeSay2020Submission = BaseForm & AllIssueTypes
+type SeeSay2020Submission = BaseForm & IssueTypes
 export default SeeSay2020Submission
+
+export function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K> {
+  const ret: any = {};
+  keys.forEach(key => {
+    ret[key] = obj[key];
+  })
+  return ret;
+}
+export function drop<T extends Record<string, unknown>, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
+  const exclude = new Set(keys)
+  const k = Object.keys(obj) as (keyof T)[]
+  return pick(obj, ...k.filter(key => {
+    return !exclude.has(key as K)  //TODO(Dave): FIXME!
+  }))
+}

@@ -8,10 +8,23 @@ import { Button, Headline, RadioButton } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import uuid from 'react-native-uuid';
 import { Command } from '../../actions/Actions';
-import SeeSay2020Submission, { BaseForm, FormSelectors, IssueTypeDetails, ProblemType } from '../../types/SeeSay2020Submission';
+import SeeSay2020Submission, { FormSelectors } from '../../types/SeeSay2020Submission';
 import DateTime from '../DateTime';
 
 type Form = SeeSay2020Submission
+
+type PartialExcept<T, K extends keyof T> =
+  Partial<Omit<T, K>> &
+  Pick<T, K>
+type PartialOnly<T, K extends keyof T> =
+  Partial<Pick<T, K>> &
+  Omit<T, K>
+type RequiredExcept<T, K extends keyof T> =
+  Required<Omit<T, K>> &
+  Pick<T, K>
+type RequiredOnly<T, K extends keyof T> =
+  Required<Pick<T, K>> &
+  Omit<T, K>
 
 type CB = {
   onSubmit: (form: Form) => void,
@@ -19,17 +32,15 @@ type CB = {
 }
 type P = {
   dispatch: (command: Command) => void,
-  initialValues: Partial<BaseForm & ProblemType>,
+  initialValues: PartialExcept<Form, "issue_type" | "issue_subtype">,
   location: LocationObject,
-  formStructure: Partial<FormSelectors>,
-  display?: <ST>(issueType: IssueTypeDetails<ST>) => boolean,
+  formStructure: Partial<Readonly<FormSelectors>>,
+  display?: (issueType: FormSelectors[keyof FormSelectors]) => boolean,
 } & Partial<CB>
 type FormErrors = {
   [K in keyof Form]?: String
 }
-export const emptyFormData: Form = Object.seal({
-  issue_type: "intimidation",
-  issue_subtype: "polling_place_interference",
+const emptyFormData: Omit<Form, "issue_type" | "issue_subtype"> = Object.seal({
   description: "",
   incident_state: "",
   incident_city: "",
@@ -42,9 +53,19 @@ const noops: CB = {
   onSubmit: ignore,
   onCancel: ignore,
 }
+const defaults: RequiredOnly<Partial<P>, "display"> = {
+  display: x => true,
+  ...noops
+}
+
+const typedKeys = <T extends Record<string, unknown>>(obj: T): Array<keyof T> => Object.keys(obj);
 
 const IncidentReport: FunctionComponent<P> = (props) => {
-  const p = { ...noops, ...props }
+  const p: RequiredOnly<P, "display"> = {
+    ...defaults,
+    ...props,
+    display: props.display ?? defaults.display
+  }
   const [dateVisible, setDateVisible] = useState(false)
 
   const validate: (f: Form) => void | object = (f) => {
@@ -62,11 +83,12 @@ const IncidentReport: FunctionComponent<P> = (props) => {
   return (
     <View style={{ flex: 1 }}>
       <Formik<Form>
-        initialValues={{ ...emptyFormData, ...p.initialValues }}
+        // Ugh, this "as any" is soooo janky /facepalm
+        initialValues={{ ...emptyFormData, ...p.initialValues } as any}
         validateOnChange={true}
         validateOnMount={true}
         validateOnBlur={true}
-        onSubmit={p.onSubmit}
+        onSubmit={(v) => p.onSubmit?.(v)}
         validate={validate}
       >
         {({ handleChange, handleBlur, handleSubmit, touched, errors, values }) => {
@@ -113,33 +135,33 @@ const IncidentReport: FunctionComponent<P> = (props) => {
               <ScrollView keyboardShouldPersistTaps="handled" style={{ maxWidth: 500 }} >
 
                 {/* Primary issue type */}
-                {Object
-                  .keys(p.formStructure)
-                  .filter(k => p.display?.(p.formStructure[k]) ?? true)
-                  .length > 1 && <View>
+                {typedKeys(p.formStructure)
+                  .filter(k => p.display?.(p.formStructure[k]!) ?? true)
+                  .length > 1 &&
+                  <View>
                     <Headline key="maintitle" style={{
                       margin: 5,
                       marginVertical: 10,
                     }}>
                       What happened?
-                </Headline>
+                    </Headline>
                     <RadioButton.Group
                       onValueChange={value => {
                         const updateSubtype = value !== values.issue_type
                         handleChange("issue_type")(value)
                         if (updateSubtype) {
-                          handleChange("issue_subtype")(p.formStructure[value].subtypes[0].subtype)
+                          handleChange("issue_subtype")(
+                            Object.keys(p.formStructure[value as keyof FormSelectors]!.subtypes)[0])
                           // TODO(Dave): Select the first option.
                         }
                       }}
                       value={values.issue_type || ""}
                     >
-                      {Object
-                        .keys(p.formStructure)
-                        .filter(k => p.display?.(p.formStructure[k]) ?? true)
+                      {typedKeys(p.formStructure)
+                        .filter(k => p.display?.(p.formStructure[k]!) ?? true)
                         .flatMap((k, i, a) =>
-                          (p.display?.(p.formStructure[k]) ?? true) ?
-                            [radio(p.formStructure[k].label, k, {
+                          (p.display?.(p.formStructure[k]!) ?? true) ?
+                            [radio(p.formStructure[k]!.label, k, {
                               // Alternate background shades
                               ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
                               // ...(i === 0 ? { borderTopWidth: 1 } : {}),
@@ -147,7 +169,8 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                             })] :
                             []
                         )}
-                    </RadioButton.Group></View>
+                    </RadioButton.Group>
+                  </View>
                 }
 
                 {/* TODO(Dave): This doesn't seem to actually do anything.  Why? */}
@@ -164,10 +187,9 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   onValueChange={value => handleChange("issue_subtype")(value)}
                   value={values.issue_subtype || ""}
                 >
-                  {p.formStructure[values.issue_type]
-                    .subtypes
-                    .map((k, i, a) =>
-                      radio(k.label, k.subtype, {
+                  {Object.entries(p.formStructure[values.issue_type as keyof FormSelectors]?.subtypes ?? {})
+                    .map(([k, v], i, a) =>
+                      radio(v, k, {
                         //  Alternate background shades
                         ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
                         // ...(i === 0 ? { borderTopWidth: 1 } : {}),

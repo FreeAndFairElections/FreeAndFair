@@ -13,7 +13,7 @@ import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
 import { submitToSeeSay2020 } from './src/helpers/SeeSaySubmit';
 import AppScreen from './src/types/AppScreen';
 import AppState from './src/types/AppState';
-import { formSelectors } from './src/types/SeeSay2020Submission';
+import { drop, formSelectors, pick } from './src/types/SeeSay2020Submission';
 
 export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
 
@@ -215,7 +215,7 @@ const App: FunctionComponent<Props> = (props) => {
                     }}
                     dispatch={dispatch}
                     location={state.location}
-                    formStructure={{ intimidation: formSelectors.intimidation }}
+                    formStructure={pick(formSelectors, "intimidation")}
                     // display={x => x.goodThing ?? false}
                     onCancel={() => dispatch({ type: Action.GoHome })}
                     onSubmit={(f) => {
@@ -240,12 +240,14 @@ const App: FunctionComponent<Props> = (props) => {
                 return (
                   <IncidentReport
                     initialValues={{
-                      ...(state.devBuild && { globalid: knownDuplicateUUID })
+                      issue_type: "registration",
+                      issue_subtype: "not_listed",
+                      ...(state.devBuild && { globalid: knownDuplicateUUID }),
                     }}
                     dispatch={dispatch}
                     location={state.location}
-                    formStructure={formSelectors}
-                    display={x => !x.goodThing ?? false}
+                    formStructure={drop(formSelectors, "joy")}
+                    // display={x => !x.goodThing ?? false}
                     onCancel={() => dispatch({ type: Action.GoHome })}
                     onSubmit={(f) => {
                       state.log(`Created problem report ${JSON.stringify(f, null, 2)}`)
@@ -275,8 +277,8 @@ const App: FunctionComponent<Props> = (props) => {
                     }}
                     dispatch={dispatch}
                     location={state.location}
-                    formStructure={{ joy: formSelectors.joy }}
-                    display={x => x.goodThing ?? false}
+                    formStructure={pick(formSelectors, "joy")}
+                    // display={x => x.goodThing ?? false}
                     onCancel={() => dispatch({ type: Action.GoHome })}
                     onSubmit={(f) => {
                       state.log(`Created joy report ${JSON.stringify(f, null, 2)}`)
