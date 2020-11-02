@@ -1,9 +1,11 @@
 // import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { AsyncStorage } from 'react-native';
+import { useBackHandler } from '@react-native-community/hooks';
+import ReverseGeocode from "bigdatacloud-reverse-geocoding";
 import { AppLoading } from 'expo';
 import * as Location from 'expo-location';
+import { LocationObject } from 'expo-location';
 import React, { FunctionComponent, useReducer, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { AsyncStorage, StyleSheet, Text, View } from 'react-native';
 import { Appbar, Provider as PaperProvider, Snackbar } from 'react-native-paper';
 import { Action, Command } from './src/actions/Actions';
 import NavBar from './src/components/navbar/NavBar';
@@ -13,14 +15,9 @@ import UserInfoScreen from './src/components/screens/UserInfo';
 import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
 import { submitToSeeSay2020 } from './src/helpers/SeeSaySubmit';
 import { drop, pick } from './src/helpers/TypeFunctions';
-import AppScreen from './src/types/AppScreen';
+import { default as AppScreen, default as Screen } from './src/types/AppScreen';
 import AppState, { Persisted } from './src/types/AppState';
 import SeeSay2020Submission, { FormSelectors, formSelectors } from './src/types/SeeSay2020Submission';
-import ReverseGeocode, { ILocation, IGeocode } from "bigdatacloud-reverse-geocoding";
-import { LocationObject } from 'expo-location';
-import { useBackHandler } from '@react-native-community/hooks'
-import Screen from './src/types/AppScreen'
-
 
 export const knownDuplicateUUID = "{D2B87037-D429-402D-87AB-DA024D92653C}"
 
