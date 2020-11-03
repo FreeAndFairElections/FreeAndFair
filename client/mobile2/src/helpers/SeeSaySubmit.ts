@@ -6,7 +6,7 @@ import { UserData } from '../types/UserData';
 import qs from 'qs'
 import SeeSay2020Submission from '../types/SeeSay2020Submission'
 
-const seeSay2020 = "https://services8.arcgis.com/3Y7J7SmaNLGLT6ec/arcgis/rest/services/See_Say_2020_survey/FeatureServer/applyEdits"
+const seeSay2020 = (path: string) => `https://services8.arcgis.com/3Y7J7SmaNLGLT6ec/arcgis/rest/services/See_Say_2020_survey/FeatureServer/${path}`
 
 const axios = Axios.create({
 })
@@ -59,12 +59,12 @@ export const submitToSeeSay2020: (u: UserData, f: SeeSay2020Submission, l: Locat
       rollbackOnFailure: true,
     })
 
-    axios.post(seeSay2020, body, {
+    axios.post(seeSay2020("applyEdits"), body, {
       headers: {
         "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
         "origin": "https://survey123.arcgis.com",
         "referer": "https://survey123.arcgis.com/",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
+        "user-agent": "Free And Fair Elections (mobile app)"
       }
     })
       .then((value) => {
