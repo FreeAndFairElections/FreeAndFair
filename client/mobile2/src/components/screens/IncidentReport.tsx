@@ -205,7 +205,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   {...(!midVisible
                     && {
                     // Yuck, this `as any` is shitty.
-                    description: (p.formStructure[values.issue_type]!.subtypes as any)[values.issue_subtype]
+                    description: (p.formStructure[values.issue_type]!.subtypes as any)[values.issue_subtype].label
                   })}
                   onPress={() => {
                     setMidVisible(v => !v)
@@ -220,7 +220,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   >
                     {Object.entries(p.formStructure[values.issue_type]?.subtypes ?? {})
                       .map(([k, v], i, a) =>
-                        radio(v, k, {
+                        radio(v.label, k, {
                           //  Alternate background shades
                           ...(i % 2 == 0 ? { backgroundColor: "#f8f8f8" } : {}),
                           // ...(i === 0 ? { borderTopWidth: 1 } : {}),
