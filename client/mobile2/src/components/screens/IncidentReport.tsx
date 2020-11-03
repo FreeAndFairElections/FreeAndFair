@@ -1,15 +1,18 @@
 import { LocationObject } from 'expo-location';
 import { Formik } from 'formik';
+import { PhoneNumberFormat } from 'google-libphonenumber';
 import React, { FunctionComponent, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Input } from 'react-native-elements';
 import { TextInputMask, TextInputMaskProps } from 'react-native-masked-text';
-import { Button, List, RadioButton } from 'react-native-paper';
+import { Button, Divider, List, RadioButton } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import uuid from 'react-native-uuid';
 import { Command } from '../../actions/Actions';
 import SeeSay2020Submission, { FormSelectors } from '../../types/SeeSay2020Submission';
 import DateTime from '../DateTime';
+import TakePhoto, { Photo } from '../TakePhoto';
+import Photos from '../Photos';
 
 type Form = SeeSay2020Submission
 
@@ -74,6 +77,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
   const [dateVisible, setDateVisible] = useState(false)
   const [topVisible, setTopVisible] = useState(manyTop)
   const [midVisible, setMidVisible] = useState(manyMid(p.initialValues.issue_type))
+  const [photos, setPhotos] = useState<Photo[]>([])
 
   const validate: (f: Form) => void | object = (f) => {
     const errors: FormErrors = {}
@@ -126,7 +130,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                 label={label}
                 renderErrorMessage={true}
                 inputContainerStyle={{
-                  ...(touched[p] && errors[p] && {backgroundColor: "#ffe0e0"})
+                  ...(touched[p] && errors[p] && { backgroundColor: "#ffe0e0" })
                 }}
                 inputStyle={{
                   ...styles.text,
@@ -199,10 +203,10 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   titleStyle={styles.headline}
                   expanded={midVisible}
                   {...(!midVisible
-                    && { 
-                      // Yuck, this `as any` is shitty.
-                      description: (p.formStructure[values.issue_type]!.subtypes as any)[values.issue_subtype]
-                    })}
+                    && {
+                    // Yuck, this `as any` is shitty.
+                    description: (p.formStructure[values.issue_type]!.subtypes as any)[values.issue_subtype]
+                  })}
                   onPress={() => {
                     setMidVisible(v => !v)
                   }}
@@ -272,17 +276,58 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   }
                 })}
 
+                <TakePhoto addPhoto={photo =>
+                  setPhotos((photos) => { photos.push(photo); return photos })
+                } />
+
+                <Photos
+                  photos={photos}
+                  removePhoto={(idx) => setPhotos(photos =>
+                    [...photos.slice(undefined, idx), ...photos.slice(idx + 1)]
+                  )}
+                />
+
+                <Divider />
+
                 {/* Submissions buttons */}
                 <View style={styles.footerButtonGroup}>
                   <Button
                     mode="outlined"
-                    onPress={p.onCancel}
+                    onPress={() => {
+                      Alert.alert(
+                        'Confirm Cancel',
+                        'Are you sure you want to cancel this report?',
+                        [
+                          { text: 'No', onPress: () => { }, style: 'cancel' },
+                          { text: 'Yes', onPress: p.onCancel, style: "destructive" },
+                        ]
+                      )
+                    }}
                     style={styles.buttonOuter}
                     contentStyle={styles.buttonInner}
                   >Cancel</Button>
                   <Button
                     mode="contained"
-                    onPress={handleSubmit}
+                    onPress={() => {
+                      if (validate(values) !== {}) {
+                        Alert.alert(
+                          'Fix submission',
+                          "You are missing some required info",
+                          [
+                            { text: 'Ok', onPress: () => { }, style: 'cancel' },
+                          ]
+                        )
+                      } else {
+                        Alert.alert(
+                          'Confirm Submit',
+                          'Are you ready to submit this report?',
+                          [
+                            { text: 'No', onPress: () => { }, style: 'cancel' },
+                            { text: 'Yes', onPress: handleSubmit as any, style: "default" },
+                          ]
+                        )
+                      }
+                    }}
                     style={styles.buttonOuter}
                     contentStyle={styles.buttonInner}
                   >Submit</Button>

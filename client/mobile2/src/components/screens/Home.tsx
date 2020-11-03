@@ -2,7 +2,6 @@ import React, { FunctionComponent } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, Text } from 'react-native-paper';
 import { Action, Command } from '../../actions/Actions';
-import { Ionicons } from '@expo/vector-icons';
 
 type P = {
   dispatch: (command: Command) => void,
