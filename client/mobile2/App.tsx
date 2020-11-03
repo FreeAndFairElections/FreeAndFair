@@ -188,12 +188,14 @@ const App: FunctionComponent<Props> = (props) => {
               //   // message: `Geocoded to: ${JSON.stringify(v, null, 2)}`
               //   message: `Got location: ${city}, ${stateAbbrev}`
               // })
-              if (city !== state.persisted.cityHint || stateAbbrev !== state.persisted.stateHint) {
-                dispatch({
-                  type: Action.SnackbarMessage,
-                  message: `Got location: ${city}, ${stateAbbrev}`
-                })
-              }
+
+              // if (city !== state.persisted.cityHint || stateAbbrev !== state.persisted.stateHint) {
+              //   dispatch({
+              //     type: Action.SnackbarMessage,
+              //     message: `Got location: ${city}, ${stateAbbrev}`
+              //   })
+              // }
+              state.log(`Got location: ${city}, ${stateAbbrev}`)
             }
 
             dispatch({
