@@ -1,18 +1,17 @@
 import { LocationObject } from 'expo-location';
 import { Formik } from 'formik';
-import { PhoneNumberFormat } from 'google-libphonenumber';
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Input } from 'react-native-elements';
 import { TextInputMask, TextInputMaskProps } from 'react-native-masked-text';
-import { Button, Divider, List, RadioButton } from 'react-native-paper';
+import { Button, Divider, List, RadioButton, Text } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import uuid from 'react-native-uuid';
 import { Command } from '../../actions/Actions';
 import SeeSay2020Submission, { FormSelectors } from '../../types/SeeSay2020Submission';
 import DateTime from '../DateTime';
-import TakePhoto, { Photo } from '../TakePhoto';
 import Photos from '../Photos';
+import TakePhoto, { Photo } from '../TakePhoto';
 
 type Form = SeeSay2020Submission
 
@@ -41,7 +40,7 @@ type P = {
   display?: (issueType: FormSelectors[keyof FormSelectors]) => boolean,
 } & Partial<CB>
 type FormErrors = {
-  [K in keyof Form]?: String
+  [K in keyof Form]?: string
 }
 const emptyFormData: Omit<Form, "issue_type" | "issue_subtype"> = Object.seal({
   description: "",
@@ -90,6 +89,10 @@ const IncidentReport: FunctionComponent<P> = (props) => {
 
     if (!f.description)
       errors.description = "Missing Description"
+
+    if ((!f.photos || f.photos.length === 0) && (p.formStructure[f.issue_type]?.subtypes as any)[f.issue_subtype].needsPhoto)
+      errors.photos = "Missing Required Photo(s)"
+
     return errors
   }
 
@@ -104,7 +107,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
         onSubmit={(v) => p.onSubmit?.(v)}
         validate={validate}
       >
-        {({ handleChange, handleBlur, handleSubmit, touched, errors, values }) => {
+        {({ setFieldValue, handleChange, handleBlur, handleSubmit, touched, errors, values }) => {
           const radio = (label: string, value: string, extraViewStyle?: ViewStyle) => (
             <View key={`${label} ${value}`} style={{
               ...extraViewStyle,
@@ -117,7 +120,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
             props?: P
           }
           const textInput = <P extends {} = TextInputProps>(
-            p: keyof Form,
+            p: Exclude<keyof Form, "photos">,
             label: string,
             customInput?: CustomInput<P>,
             customRender: (input: string) => string = x => x) => (
@@ -276,15 +279,23 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   }
                 })}
 
-                <TakePhoto addPhoto={photo =>
-                  setPhotos((photos) => { photos.push(photo); return photos })
-                } />
+                <TakePhoto
+                  addPhoto={photo => {
+                    setPhotos((photos) => [...photos, photo])
+                    setFieldValue("photos", values.photos ? [...values.photos, photo.uri] : [photo.uri])
+                  }}
+                  error={errors.photos}
+                />
 
                 <Photos
                   photos={photos}
-                  removePhoto={(idx) => setPhotos(photos =>
-                    [...photos.slice(undefined, idx), ...photos.slice(idx + 1)]
-                  )}
+                  removePhoto={(idx) => {
+                    setPhotos(photos => [...photos.slice(undefined, idx), ...photos.slice(idx + 1)])
+                    setFieldValue(
+                      "photos",
+                      [...values.photos!.slice(undefined, idx), ...values.photos!.slice(idx + 1)]
+                    )
+                  }}
                 />
 
                 <Divider />
@@ -315,7 +326,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                           "You are missing some required info",
                           [
                             // using `handleSubmit` as it triggers validation
-                            { text: 'Ok', onPress: handleSubmit, style: 'cancel' },
+                            { text: 'Ok', onPress: handleSubmit as any, style: 'cancel' },
                           ]
                         )
                       } else {
@@ -374,9 +385,4 @@ const styles = StyleSheet.create({
     letterSpacing: 0
   },
 
-  error: {
-    margin: 5,
-    fontSize: 12,
-    // color: theme.colors.error,
-  },
 })

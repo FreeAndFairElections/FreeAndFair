@@ -153,6 +153,7 @@ export type BaseForm = {
   // TODO(Dave): Fix this shit.
   incident_time: string,  // microseconds since epoch
   globalid: string,
+  photos?: string[],
 }
 
 type SeeSay2020Submission = BaseForm & IssueTypes

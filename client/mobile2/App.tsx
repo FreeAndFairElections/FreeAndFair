@@ -170,7 +170,7 @@ const App: FunctionComponent<Props> = (props) => {
             long: location.coords.longitude
           })
           place.then(v => {
-            state.log(`Geocoded to ${JSON.stringify(v, null, 2)}`)
+            // state.log(`Geocoded to ${JSON.stringify(v, null, 2)}`)
             var city = (v as any).city
             if (!city) {
               for (const level of (((v as any).localityInfo.administrative) as { name: string, adminLevel: number }[]).reverse())

@@ -2,7 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ImagePickerResult } from 'expo-image-picker';
 import React, { useEffect } from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 
 export type Photo = ImagePickerResult & { cancelled: false }
 
@@ -10,6 +10,7 @@ type CB = {
   addPhoto: (image: Photo) => void
 }
 type P = {
+  error?: string,
 } & Partial<CB>
 const ignore = () => { }
 const noops: CB = {
@@ -61,15 +62,13 @@ const TakePhoto: (p: P) => JSX.Element = props => {
         icon="camera"
         onPress={pickImage}
         contentStyle={styles.buttonInner}
-        style={styles.buttonOuter}
+        style={{
+          ...styles.buttonOuter, 
+          ...(p.error && {backgroundColor:"#ffe0e0"}),
+        }}
       >
-        Add Photo
-        </Button>
-      {/* {image && <Image source={{ uri: image.uri }} style={{ 
-        transform: [{scale: 1}],  
-        width: 200, 
-        height: 200.0 * image.height / image.width,
-        }} />} */}
+        Add Photo {p.error && "(required)"}
+      </Button>
     </View>
   );
 }
