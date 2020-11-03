@@ -8,6 +8,7 @@ import { Button, Divider, List, RadioButton, Text } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import uuid from 'react-native-uuid';
 import { Command } from '../../actions/Actions';
+import { Log } from '../../types/AppState';
 import SeeSay2020Submission, { FormSelectors } from '../../types/SeeSay2020Submission';
 import DateTime from '../DateTime';
 import Photos from '../Photos';
@@ -38,6 +39,8 @@ type P = {
   location: LocationObject,
   formStructure: Partial<Readonly<FormSelectors>>,
   display?: (issueType: FormSelectors[keyof FormSelectors]) => boolean,
+  log: Log,
+  dev: boolean,
 } & Partial<CB>
 type FormErrors = {
   [K in keyof Form]?: string
@@ -78,7 +81,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
   const [midVisible, setMidVisible] = useState(manyMid(p.initialValues.issue_type))
   const [photos, setPhotos] = useState<Photo[]>([])
 
-  const validate: (f: Form) => void | object = (f) => {
+  const validate: (f: Form) => FormErrors = (f) => {
     const errors: FormErrors = {}
 
     if (!f.incident_city)
@@ -90,8 +93,12 @@ const IncidentReport: FunctionComponent<P> = (props) => {
     if (!f.description)
       errors.description = "Missing Description"
 
+      try {
     if ((!f.photos || f.photos.length === 0) && (p.formStructure[f.issue_type]?.subtypes as any)[f.issue_subtype].needsPhoto)
       errors.photos = "Missing Required Photo(s)"
+      } catch(err) {
+        props.log(`Failed on ${f.issue_type} - ${f.issue_subtype}`)
+      }
 
     return errors
   }
@@ -100,7 +107,11 @@ const IncidentReport: FunctionComponent<P> = (props) => {
     <View style={{ flex: 1 }}>
       <Formik<Form>
         // Ugh, this "as any" is soooo janky /facepalm
-        initialValues={{ ...emptyFormData, ...p.initialValues } as any}
+        initialValues={{ 
+          ...emptyFormData, 
+          globalid: `{${uuid.v4()}}`, 
+          ...p.initialValues,
+        } as any}
         validateOnChange={true}
         validateOnMount={true}
         validateOnBlur={true}
@@ -265,7 +276,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                     dispatch={p.dispatch}
                     onCancel={() => setDateVisible(false)}
                     onSubmit={(d) => {
-                      console.log(`picked: ${d} ${d.getTime()}`)
+                      // console.log(`picked: ${d} ${d.getTime()}`)
                       handleChange("incident_time")(`${d.getTime()}`)
                       setDateVisible(false)
                     }}
@@ -282,7 +293,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                 <TakePhoto
                   addPhoto={photo => {
                     setPhotos((photos) => [...photos, photo])
-                    setFieldValue("photos", values.photos ? [...values.photos, photo.uri] : [photo.uri])
+                    setFieldValue("photos", values.photos ? [...values.photos, photo] : [photo])
                   }}
                   error={errors.photos}
                 />
@@ -320,22 +331,22 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   <Button
                     mode="contained"
                     onPress={() => {
-                      if (validate(values) !== {}) {
-                        Alert.alert(
-                          'Fix submission',
-                          "You are missing some required info",
-                          [
-                            // using `handleSubmit` as it triggers validation
-                            { text: 'Ok', onPress: handleSubmit as any, style: 'cancel' },
-                          ]
-                        )
-                      } else {
+                      if (Object.keys(validate(values)).length === 0) {
                         Alert.alert(
                           'Confirm Submit',
                           'Are you ready to submit this report?',
                           [
                             { text: 'No', onPress: () => { }, style: 'cancel' },
                             { text: 'Yes', onPress: handleSubmit as any, style: "default" },
+                          ]
+                        )
+                      } else {
+                        Alert.alert(
+                          'Fix submission',
+                          `You are missing some required info ${p.dev && JSON.stringify(validate(values), null, 2)}`,
+                          [
+                            // using `handleSubmit` as it triggers validation
+                            { text: 'Ok', onPress: handleSubmit as any, style: 'cancel' },
                           ]
                         )
                       }

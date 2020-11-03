@@ -13,7 +13,7 @@ import HomeScreen from './src/components/screens/Home';
 import IncidentReport from './src/components/screens/IncidentReport';
 import UserInfoScreen from './src/components/screens/UserInfo';
 import { cacheFonts, cacheImages } from './src/helpers/AssetsCaching';
-import { submitToSeeSay2020 } from './src/helpers/SeeSaySubmit';
+import { submitToSeeSay2020, uploadToSeeSay2020 } from './src/helpers/SeeSaySubmit';
 import { drop, pick } from './src/helpers/TypeFunctions';
 import { default as AppScreen, default as Screen } from './src/types/AppScreen';
 import AppState, { Persisted } from './src/types/AppState';
@@ -33,7 +33,7 @@ const useAsyncStorage = (key: string)/*: AsyncStorageHook*/ => {
 const screenReducer: (s: AppState, c: Command) => AppState = (state, command) => {
   const save = (newPersisted: Persisted) => {
     const toSave = JSON.stringify(newPersisted)
-    state.log(`Saving user info: ${toSave}`)
+    // state.log(`Saving user info: ${toSave}`)
 
     state.persistStore.setItem(toSave, (error?: Error) => {
       error && state.dispatch?.({
@@ -60,7 +60,7 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
     case Action.SaveUserData:
       return save({ ...state.persisted, userData: command.payload })
     case Action.LoadedPersistedData:
-      state.log(`Loaded data: ${JSON.stringify(command.payload)}`)
+      // state.log(`Loaded data: ${JSON.stringify(command.payload)}`)
       return {
         ...state,
         persisted: command.payload,
@@ -109,8 +109,8 @@ const App: FunctionComponent<Props> = (props) => {
     screen: AppScreen.Home,
     navBar: navBar,
     navBarOpen: false,
-    log: (m, ...p) =>
-      (props.exp?.manifest?.packagerOpts?.dev ? console.log(m, p) : undefined),
+    log: (...p) =>
+      (props.exp?.manifest?.packagerOpts?.dev ? console.log(...p) : undefined),
     devBuild: props.exp?.manifest?.packagerOpts?.dev ? true : false,
     persistStore: useAsyncStorage("persisted"),
     persisted: {}
@@ -137,7 +137,7 @@ const App: FunctionComponent<Props> = (props) => {
       if (result) {
         // dispatch({ type: Action.SnackbarMessage, message: "Loaded app data" })
         dispatch({ type: Action.LoadedPersistedData, payload: JSON.parse(result) || {} })
-        state.log(`Loaded: ${result}`)
+        // state.log(`Loaded: ${result}`)
       }
     })
 
@@ -195,7 +195,7 @@ const App: FunctionComponent<Props> = (props) => {
               //     message: `Got location: ${city}, ${stateAbbrev}`
               //   })
               // }
-              state.log(`Got location: ${city}, ${stateAbbrev}`)
+              // state.log(`Got location: ${city}, ${stateAbbrev}`)
             }
 
             dispatch({
@@ -260,20 +260,25 @@ const App: FunctionComponent<Props> = (props) => {
             incident_city: state.persisted.cityHint,
             incident_state: state.persisted.stateHint,
             ...initial,
-            ...(state.devBuild && { globalid: knownDuplicateUUID }),
+            // ...(state.devBuild && { globalid: knownDuplicateUUID }),
           }}
+          dev={state.devBuild}
+          log={state.log}
           dispatch={dispatch}
           location={state.location}
           formStructure={what}
           onCancel={() => dispatch({ type: Action.GoHome })}
           onSubmit={(f) => {
-            state.log(`Created ${type} report ${JSON.stringify(f, null, 2)}`)
+            state.log(`Created ${type} report ${JSON.stringify({...f, photos: f.photos ? "<elided>" : undefined }, null, 2)}`)
             submitToSeeSay2020(
               state.persisted.userData!,
               f,
               state.location!,
               dispatch,
               state.log)
+            // for (const photo of f.photos || []) {
+            //   uploadToSeeSay2020(photo, state.log)
+            // }  
             dispatch({ type: Action.GoHome })
             dispatch({ type: Action.SnackbarMessage, message: `Submitting ${type} report` })
           }}

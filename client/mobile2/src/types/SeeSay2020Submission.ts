@@ -1,14 +1,15 @@
+import { Photo } from "../components/Photos";
 
 type IssueKeys = {
   registration: "not_listed" | "name_incorrect" | "already_voted" | "other"
-  machine: "other"
+  machine: "NULLL"
   intimidation: "polling_place_interference" | "eligibility_challenged" | "perusade_voter" | "non_authorized_person" | "advertising" | "other"
   place: "longlines" | "closed" | "poll_worker" | "poll_tape" | "interfere" | "other"
   ballot: "absentee" | "provisional_not_offered" | "missing" | "ballot_removal" | "other"
   access: "language" | "disability" | "other"
   misinformation: "news" | "text" | "email" | "social_media" | "other"
   law: "assist" | "response" | "other"
-  courts: "other"
+  courts: "NULLL"
   joy: "dancing" | "kindness" | "patience" | "other"
   polltape: "photo" | "photo_missing"
   other: "fraud" | "other"
@@ -49,7 +50,7 @@ export const formSelectors: Readonly<FormSelectors> = {
   machine: {
     label: "Problems With Voting Machine",
     subtypes: {
-      other: { label: "Some problem (explain below)" },
+      NULLL: { label: "Some problem (explain below)" },
     },
   },
   intimidation: {
@@ -113,7 +114,7 @@ export const formSelectors: Readonly<FormSelectors> = {
   courts: {
     label: "Courts",
     subtypes: {
-      other: { label: "Some problem (explain below)" },
+      NULLL: { label: "Some problem (explain below)" },
     },
   },
   polltape: {
@@ -153,7 +154,7 @@ export type BaseForm = {
   // TODO(Dave): Fix this shit.
   incident_time: string,  // microseconds since epoch
   globalid: string,
-  photos?: string[],
+  photos?: Photo[],
 }
 
 type SeeSay2020Submission = BaseForm & IssueTypes

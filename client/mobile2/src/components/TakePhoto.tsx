@@ -36,11 +36,10 @@ const TakePhoto: (p: P) => JSX.Element = props => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
       // aspect: [4, 3],
-      quality: 1,
+      quality: Platform.OS === "ios" ? 0.4 : 0.69,
       exif: true,
+      base64: true,
     });
-
-    console.log(result);
 
     if (!result.cancelled) {
       //setImage(result);
