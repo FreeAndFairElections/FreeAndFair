@@ -314,7 +314,8 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                           'Fix submission',
                           "You are missing some required info",
                           [
-                            { text: 'Ok', onPress: () => { }, style: 'cancel' },
+                            // using `handleSubmit` as it triggers validation
+                            { text: 'Ok', onPress: handleSubmit, style: 'cancel' },
                           ]
                         )
                       } else {
@@ -371,5 +372,11 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     marginVertical: 2,
     letterSpacing: 0
-  }
+  },
+
+  error: {
+    margin: 5,
+    fontSize: 12,
+    // color: theme.colors.error,
+  },
 })
