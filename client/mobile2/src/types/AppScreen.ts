@@ -3,6 +3,7 @@ enum AppScreen {
   Home,
   UserInfo,
   IntimidationReport,
+  MisinformationReport,
   ProblemReport,
   JoyReport,
   PollTapeReport,

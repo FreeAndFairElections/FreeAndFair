@@ -69,6 +69,8 @@ const screenReducer: (s: AppState, c: Command) => AppState = (state, command) =>
       return { ...state, screen: AppScreen.Home }
     case Action.EditUserData:
       return { ...state, screen: AppScreen.UserInfo }
+    case Action.StartMisinformationReport:
+      return { ...state, screen: AppScreen.MisinformationReport }
     case Action.StartProblemReport:
       return { ...state, screen: AppScreen.ProblemReport }
     case Action.StartIntimidationReport:
@@ -269,7 +271,7 @@ const App: FunctionComponent<Props> = (props) => {
           formStructure={what}
           onCancel={() => dispatch({ type: Action.GoHome })}
           onSubmit={(f) => {
-            state.log(`Created ${type} report ${JSON.stringify({...f, photos: f.photos ? "<elided>" : undefined }, null, 2)}`)
+            state.log(`Created ${type} report ${JSON.stringify({ ...f, photos: f.photos ? "<elided>" : undefined }, null, 2)}`)
             submitToSeeSay2020(
               state.persisted.userData!,
               f,
@@ -338,6 +340,14 @@ const App: FunctionComponent<Props> = (props) => {
                 {
                   issue_type: "intimidation",
                   issue_subtype: "polling_place_interference",
+                })
+            case AppScreen.MisinformationReport:
+              return report(
+                "misinformation",
+                pick(formSelectors, "misinformation"),
+                {
+                  issue_type: "misinformation",
+                  issue_subtype: "other",
                 })
             case AppScreen.ProblemReport:
               return report(

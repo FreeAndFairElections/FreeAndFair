@@ -50,7 +50,7 @@ const emptyFormData: Omit<Form, "issue_type" | "issue_subtype"> = Object.seal({
   incident_state: "",
   incident_city: "",
   incident_time: `${(new Date()).getTime()}`,  // milliseconds since epoch  
-  globalid: `{${uuid.v4()}}`,
+  globalid: `{${uuid.v4().toUpperCase()}}`,
 })
 
 const ignore = () => { }
@@ -93,32 +93,41 @@ const IncidentReport: FunctionComponent<P> = (props) => {
     if (!f.description)
       errors.description = "Missing Description"
 
-      try {
-    if ((!f.photos || f.photos.length === 0) && (p.formStructure[f.issue_type]?.subtypes as any)[f.issue_subtype].needsPhoto)
-      errors.photos = "Missing Required Photo(s)"
-      } catch(err) {
-        props.log(`Failed on ${f.issue_type} - ${f.issue_subtype}`)
-      }
+    try {
+      // p.log(`Using ${f.issue_type} - ${f.issue_subtype}`)
+      // p.log(`Structure: ${JSON.stringify((p.formStructure[f.issue_type]?.subtypes as any)[f.issue_subtype], null, 2)}`)
+      // p.log(`needsPhoto: ${(p.formStructure[f.issue_type]?.subtypes as any)[f.issue_subtype].needsPhoto}`)
+      if ((!f.photos || f.photos.length === 0) && (p.formStructure[f.issue_type]?.subtypes as any)[f.issue_subtype].needsPhoto)
+        errors.photos = "Missing Required Photo(s)"
+    } catch (err) {
+      p.log(`Failed on ${f.issue_type} - ${f.issue_subtype}`)
+      p.log(`Form: ${JSON.stringify({
+        ...f,
+        photos: "<elided>"
+      }, null, 2)}`)
+    }
 
+    // p.log(`Errors: ${JSON.stringify(errors, null, 2)}\n`)
     return errors
   }
 
+  const initialValues = {
+    ...emptyFormData,
+    globalid: `{${uuid.v4().toUpperCase()}}`,
+    ...p.initialValues,
+  }
   return (
     <View style={{ flex: 1 }}>
       <Formik<Form>
         // Ugh, this "as any" is soooo janky /facepalm
-        initialValues={{ 
-          ...emptyFormData, 
-          globalid: `{${uuid.v4()}}`, 
-          ...p.initialValues,
-        } as any}
+        initialValues={initialValues as any}
         validateOnChange={true}
-        validateOnMount={true}
+        initialErrors={validate(initialValues as any)}
         validateOnBlur={true}
         onSubmit={(v) => p.onSubmit?.(v)}
         validate={validate}
       >
-        {({ setFieldValue, handleChange, handleBlur, handleSubmit, touched, errors, values }) => {
+        {({ setFieldValue, setValues, handleChange, handleBlur, handleSubmit, touched, errors, values }) => {
           const radio = (label: string, value: string, extraViewStyle?: ViewStyle) => (
             <View key={`${label} ${value}`} style={{
               ...extraViewStyle,
@@ -183,14 +192,15 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                       <RadioButton.Group
                         onValueChange={value => {
                           const updateSubtype = value !== values.issue_type
-                          handleChange("issue_type")(value)
+                          const newSubtype = updateSubtype ? Object.keys(p.formStructure[value as keyof FormSelectors]!.subtypes)[0] : values.issue_subtype
+                          // p.log(`Changing to ${value} ${newSubtype}`)
+                          setValues({
+                            ...values,
+                            issue_type: value,
+                            issue_subtype: newSubtype
+                          } as any, true)
                           setTopVisible(false)
                           setMidVisible(manyMid(value as keyof FormSelectors))
-
-                          if (updateSubtype) {
-                            handleChange("issue_subtype")(
-                              Object.keys(p.formStructure[value as keyof FormSelectors]!.subtypes)[0])
-                          }
                         }}
                         value={values.issue_type || ""}
                       >
@@ -228,7 +238,11 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                   <RadioButton.Group
                     onValueChange={value => {
                       setMidVisible(false)
-                      handleChange("issue_subtype")(value)
+                      // p.log(`Changing subtype to ${values.issue_type} ${value}`)
+                      setValues({
+                        ...values,
+                        issue_subtype: value,
+                      } as any, true)
                     }}
                     value={values.issue_subtype || ""}
                   >
@@ -343,7 +357,7 @@ const IncidentReport: FunctionComponent<P> = (props) => {
                       } else {
                         Alert.alert(
                           'Fix submission',
-                          `You are missing some required info ${p.dev && JSON.stringify(validate(values), null, 2)}`,
+                          `You are missing some required info ${p.dev ? JSON.stringify(validate(values), null, 2) : ""}`,
                           [
                             // using `handleSubmit` as it triggers validation
                             { text: 'Ok', onPress: handleSubmit as any, style: 'cancel' },

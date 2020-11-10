@@ -4,7 +4,7 @@ import React, { FunctionComponent } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Input } from 'react-native-elements';
 import { TextInputMask, TextInputMaskProps } from 'react-native-masked-text';
-import { Button, Headline } from 'react-native-paper';
+import { Button, Divider, Headline, Text } from 'react-native-paper';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import { UserData } from '../../types/UserData';
 
@@ -117,6 +117,11 @@ const WhoAreYou: FunctionComponent<P> = (props) => {
                 <Headline style={{ margin: 5, marginVertical: 10 }}>
                   Tell us about yourself
                 </Headline>
+                <Text style={styles.smallText}>
+                  This information is not posted publicly, but may be used to contact you in case additional information is needed.
+                </Text>
+
+                <Divider style={{margin: 5}} />
 
                 {textInput("name", "Name", {
                   props: {
@@ -196,5 +201,12 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 2,
     fontSize: 18,
+  },
+
+  smallText: {
+    marginHorizontal: 10,
+    marginBottom: 10,
+    padding: 2,
+    fontSize: 14,
   },
 })

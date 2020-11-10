@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import { Button, Divider, Text } from 'react-native-paper';
 import { Action, Command } from '../../actions/Actions';
 
@@ -46,12 +46,23 @@ const HomeScreen: FunctionComponent<P> = (p) => {
       <Button
         mode="contained"
         color="#2020ff"
+        onPress={() => p.dispatch({ type: Action.StartMisinformationReport })}
+        contentStyle={styles.buttonInner}
+        style={styles.buttonOuter}
+        {...(p.requireUserSetup && { disabled: true })}
+      >
+        Report Misinformation
+      </Button>
+
+      <Button
+        mode="contained"
+        color="#2020ff"
         onPress={() => p.dispatch({ type: Action.StartProblemReport })}
         contentStyle={styles.buttonInner}
         style={styles.buttonOuter}
         {...(p.requireUserSetup && { disabled: true })}
       >
-        Report Election Problems
+        Report Other Election Problems
       </Button>
 
       <Button
@@ -74,6 +85,27 @@ const HomeScreen: FunctionComponent<P> = (p) => {
         {...(p.requireUserSetup && { disabled: true })}
       >
         Poll Tape Report Photos
+      </Button>
+
+      <Button
+      mode="outlined"
+      icon="map-marker"
+      onPress={() => Linking.openURL("http://www.seesay2020map.com")}
+      contentStyle={styles.buttonInner}
+      style={styles.buttonOuter}
+      >
+        See reports on SeeSay2020Map.com
+      </Button>
+      {p.children}
+
+      <Button
+      mode="outlined"
+      icon="phone"
+      onPress={() => Linking.openURL("tel://866OURVOTE")}
+      contentStyle={styles.buttonInner}
+      style={styles.buttonOuter}
+      >
+        Report via 866-OUR-VOTE
       </Button>
 
       {p.children}

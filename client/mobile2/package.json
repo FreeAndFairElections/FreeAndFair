@@ -48,7 +48,8 @@
     "react-native-paper": "^4.2.0",
     "react-native-snackbar-component": "^1.1.11",
     "react-native-unimodules": "~0.11.0",
-    "react-native-uuid": "^1.4.9"
+    "react-native-uuid": "^1.4.9",
+    "expo-file-system": "~9.2.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
